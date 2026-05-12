@@ -3,312 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CondoElite v4.6</title>
+    <title>CondoElite Pro v5.0</title>
     
+    <!-- Firebase SDK (Versioni modulari) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- PDF Libs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    
+
     <style>
         :root { 
-            --bg: #f8fafc; --card: #ffffff; --text: #0f172a;
-            --primary: #2563eb; --secondary: #64748b;
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --primary: #1e40af; --secondary: #64748b; --accent: #3b82f6;
+            --success: #059669; --danger: #dc2626; --warning: #d97706;
+            --bg: #f1f5f9; --surface: #ffffff;
         }
-
-        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 
         body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background: var(--bg); margin: 0; color: var(--text); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg); color: #1e293b; margin: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* Header Professionale */
         header { 
-            background: #fff; padding: 10px 16px; 
-            display: flex; justify-content: space-between; align-items: center; 
+            background: var(--surface); padding: 12px 20px; 
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .brand { font-weight: 800; font-size: 1.1rem; color: var(--primary); }
+        .brand { font-weight: 800; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
 
-        .container { max-width: 1200px; margin: 15px auto; padding: 0 15px 50px 15px; }
+        /* Correzione Data Mobile */
+        input[type="date"] {
+            appearance: none; -webkit-appearance: none;
+            min-height: 48px; position: relative;
+        }
 
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 16px 80px; }
+
+        /* Card Style */
         .card { 
-            background: var(--card); padding: 20px; border-radius: 16px; 
-            box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid #e2e8f0; 
+            background: var(--surface); border-radius: 16px; padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            margin-bottom: 24px; border: 1px solid #f8fafc;
         }
 
-        h4 { margin: 0 0 15px 0; font-size: 0.8rem; text-transform: uppercase; color: var(--secondary); letter-spacing: 0.05em; }
+        h4 { margin: 0 0 16px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--secondary); }
 
-        .btn-main, .btn-outline { 
-            padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; 
-            border: none; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+        /* Input & Buttons */
+        input, select {
+            width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 12px;
+            font-size: 16px; margin-bottom: 14px; transition: border 0.2s; background: #fff;
         }
-        .btn-main { background: var(--primary); color: white; }
-        .btn-outline { background: #f1f5f9; color: var(--text); border: 1px solid #e2e8f0; }
+        input:focus { outline: none; border-color: var(--accent); }
 
-        input, select { 
-            width: 100%; padding: 14px; border: 1px solid #cbd5e1; 
-            border-radius: 12px; margin-bottom: 12px; font-size: 16px; background: #fff;
-        }
-
-        /* Griglia migliorata */
-        .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-
-        .table-wrapper { overflow-x: auto; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { text-align: left; padding: 12px; background: #f8fafc; font-size: 0.8rem; color: var(--secondary); }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-
-        /* Badge Esercizio Cliccabile */
-        .esercizio-trigger {
-            background: #1e293b; color: white; padding: 8px 14px; border-radius: 10px;
-            font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;
-        }
-
-        .modal { 
-            display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; 
-            background:rgba(0,0,0,0.5); backdrop-filter: blur(4px); padding: 20px;
-        }
-        .modal-content { background: white; border-radius: 20px; max-width: 450px; margin: 10% auto; padding: 24px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
-        .stats-box { text-align: center; padding: 12px; border-radius: 14px; background: #fff; border: 1px solid #e2e8f0; }
-        .stats-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+        .btn {
+            border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .btn-p { background: var(--primary); color: white; width: 100%; }
+        .btn-p:active { transform: scale(0.98); }
+        .btn-s { background: #f1f5f9; color: var(--primary); }
+
+        /* Statistiche */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-item { background: #fff; padding: 16px; border-radius: 14px; text-align: center; border: 1px solid #e2e8f0; }
+        .stat-val { font-size: 1.1rem; font-weight: 800; display: block; margin-top: 4px; }
+
+        /* Tabelle Mobile */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        th { text-align: left; padding: 12px; color: var(--secondary); font-size: 0.75rem; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 14px 12px; border-bottom: 1px solid #f8fafc; font-size: 0.9rem; }
+
+        .modal { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index:2000; padding:16px; }
+        .modal-content { background: #fff; border-radius: 24px; max-width: 500px; margin: auto; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        
+        .badge-anno { background: #1e293b; color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">🏢 CondoElite</div>
-    <div style="display:flex; align-items:center; gap:8px;">
-        <div class="esercizio-trigger" onclick="toggleModal('esercizioModal')">
-            <span id="header-anno">2024</span> ▾
-        </div>
-        <button class="btn-outline" style="width:40px; height:40px; padding:0;" onclick="toggleDropdown()">⚙️</button>
+    <div class="brand">🏢 CondoElite <span>Pro</span></div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <div class="badge-anno" onclick="toggleModal('esercizioModal')" id="disp-anno">2024</div>
+        <button onclick="toggleModal('menuModal')" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">⋮</button>
     </div>
 </header>
 
-<!-- Menu Impostazioni -->
-<div id="settingsMenu" style="display:none; position:fixed; right:16px; top:65px; background:#fff; border-radius:16px; box-shadow:var(--shadow); width:180px; border:1px solid #e2e8f0; z-index:2000;">
-    <div style="padding:8px;">
-        <button class="btn-outline" style="border:none; justify-content:flex-start; font-size:0.85rem;" onclick="toggleModal('settingsModal')">👥 Condomini</button>
-        <button class="btn-outline" style="border:none; justify-content:flex-start; font-size:0.85rem;" onclick="toggleModal('fullRegModal')">🔍 Registro</button>
-        <button class="btn-outline" style="border:none; justify-content:flex-start; font-size:0.85rem;" onclick="toggleModal('archiveModal')">📜 Archivio</button>
-        <hr style="border:0; border-top:1px solid #eee; margin:4px 0;">
-        <button class="btn-outline" style="border:none; justify-content:flex-start; font-size:0.85rem;" onclick="exportBackup()">💾 Backup</button>
-    </div>
-</div>
-
 <div class="container">
-    <!-- Stats Orizzontali -->
-    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:20px;">
-        <div class="stats-box"><small>USCITE</small><div id="val-tot-riparto-header" class="stats-val">0</div></div>
-        <div class="stats-box"><small>FONDO</small><div id="val-fondo-auto-header" class="stats-val" style="color:var(--success)">0</div></div>
-        <div class="stats-box"><small>CASSA</small><div id="val-liquidita" class="stats-val" style="color:var(--warning)">0</div></div>
+    <div class="stats-grid">
+        <div class="stat-item"><small>Uscite</small><span id="tot-uscite" class="stat-val">0€</span></div>
+        <div class="stat-item"><small>Fondo</small><span id="tot-fondo" class="stat-val" style="color:var(--success)">0€</span></div>
+        <div class="stat-item"><small>Saldo</small><span id="tot-cassa" class="stat-val" style="color:var(--warning)">0€</span></div>
     </div>
 
-    <div class="grid-2">
+    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+        <!-- Form Spesa -->
         <div class="card">
-            <h4>💸 Nuova Uscita</h4>
-            <input type="date" id="s-data">
-            <input type="text" id="s-desc" placeholder="Descrizione spesa">
-            <input type="number" id="s-imp" placeholder="Importo €">
-            <button class="btn-main" onclick="addSpesa()">Registra</button>
+            <h4>💸 Registra Uscita</h4>
+            <input type="date" id="spesa-data">
+            <input type="text" id="spesa-desc" placeholder="Descrizione (es. Assicurazione)">
+            <input type="number" id="spesa-imp" placeholder="Importo €" step="0.01">
+            <button class="btn btn-p" onclick="addSpesa()">Registra Spesa</button>
         </div>
+
+        <!-- Form Entrata -->
         <div class="card">
-            <h4>💰 Nuova Entrata</h4>
-            <select id="v-condomino"></select>
+            <h4>💰 Registra Entrata</h4>
+            <select id="v-condomino"><option>Caricamento condomini...</option></select>
             <select id="v-causale">
                 <option value="Rata Condominiale">Rata Condominiale</option>
                 <option value="Fondo Cassa">Fondo Cassa</option>
             </select>
-            <input type="number" id="v-imp" placeholder="Importo €">
-            <button class="btn-main" style="background:var(--success)" onclick="addVersamento()">Versa</button>
+            <input type="number" id="v-imp" placeholder="Importo €" step="0.01">
+            <button class="btn btn-p" style="background:var(--success)" onclick="addEntrata()">Registra Pagamento</button>
         </div>
-    </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h4>🏦 Situazione Millesimale</h4>
-            <button class="btn-outline" style="width:auto; padding:6px 12px; font-size:0.7rem;" onclick="generaBilancioPDFCompleto(db)">Scarica PDF</button>
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>Nome</th><th>Quota</th><th>Versato</th><th>Saldo</th></tr></thead>
-                <tbody id="tab-main"></tbody>
-            </table>
+        <!-- Tabella Situazione -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4>🏦 Situazione Millesimale</h4>
+                <button class="btn-s" style="border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:700" onclick="exportFullPDF()">PDF Bilancio</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Condomino</th><th>Quota</th><th>Versato</th><th>Saldo</th></tr></thead>
+                    <tbody id="tab-millesimi"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- MODALE GESTIONE ESERCIZIO (Spostato qui) -->
+<!-- MODALI -->
 <div id="esercizioModal" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0">📅 Gestione Esercizio</h3>
-        <p style="font-size:0.9rem; color:var(--secondary)">Modifica l'anno corrente o archivia definitivamente i conti per passare al nuovo esercizio.</p>
-        
-        <label style="font-size:0.75rem; font-weight:bold;">ANNO ATTIVO</label>
-        <input type="number" id="input-anno" style="margin-top:5px;">
-        
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button class="btn-outline" onclick="toggleModal('esercizioModal')">Annulla</button>
-            <button class="btn-main" onclick="cambiaAnno()">Salva Anno</button>
-        </div>
-        
-        <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-        
-        <button class="btn-main" style="background:var(--danger)" onclick="chiudiEsercizio()">💾 Archivia e Azzera</button>
-        <p style="font-size:0.7rem; color:var(--secondary); text-align:center; margin-top:8px;">L'archiviazione sposterà i dati nello Storico e azzererà le spese.</p>
+        <h3>Gestione Esercizio</h3>
+        <input type="number" id="edit-anno">
+        <button class="btn btn-p" onclick="updateAnno()">Cambia Anno</button>
+        <button class="btn btn-p" style="background:var(--danger); margin-top:12px;" onclick="archiviaAnno()">Chiudi e Archivia Esercizio</button>
+        <button class="btn btn-s" style="width:100%; margin-top:12px;" onclick="toggleModal('esercizioModal')">Annulla</button>
     </div>
 </div>
 
-<!-- Altri Modali (Settings, Registro, Archivio) -->
-<div id="settingsModal" class="modal"><div class="modal-content">
-    <h3>👥 Condomini</h3>
-    <input type="text" id="c-nome" placeholder="Nome">
-    <input type="number" id="c-mill" placeholder="Millesimi">
-    <button class="btn-main" onclick="addCondomino()">Aggiungi</button>
-    <div id="tab-nomi" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
-    <button class="btn-outline" style="margin-top:10px;" onclick="toggleModal('settingsModal')">Chiudi</button>
-</div></div>
+<div id="menuModal" class="modal">
+    <div class="modal-content">
+        <h3>Menu Pro</h3>
+        <button class="btn btn-s" style="width:100%; margin-bottom:10px;" onclick="toggleModal('condominiModal')">Gestione Condomini</button>
+        <button class="btn btn-s" style="width:100%; margin-bottom:10px;" onclick="toggleModal('registroModal')">Registro Storico</button>
+        <button class="btn btn-p" style="width:100%;" onclick="toggleModal('menuModal')">Chiudi</button>
+    </div>
+</div>
 
-<div id="fullRegModal" class="modal"><div class="modal-content" style="max-width:90%; height:80vh; overflow-y:auto;">
-    <h3>🔍 Registro</h3>
-    <div id="full-registry-body"></div>
-    <button class="btn-main" onclick="toggleModal('fullRegModal')">Chiudi</button>
-</div></div>
-
-<div id="archiveModal" class="modal"><div class="modal-content">
-    <h3>📜 Archivio</h3>
-    <div id="archiveList"></div>
-    <button class="btn-outline" onclick="toggleModal('archiveModal')">Chiudi</button>
-</div></div>
+<div id="condominiModal" class="modal">
+    <div class="modal-content">
+        <h3>Aggiungi Condomino</h3>
+        <input type="text" id="c-nome" placeholder="Nome e Cognome">
+        <input type="number" id="c-mill" placeholder="Millesimi (es. 125.50)">
+        <button class="btn btn-p" onclick="addCondomino()">Salva Condomino</button>
+        <div id="lista-condomini" style="margin-top:20px;"></div>
+        <button class="btn btn-s" style="width:100%; margin-top:20px;" onclick="toggleModal('condominiModal')">Chiudi</button>
+    </div>
+</div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('condoElite_v46')) || { 
-        anno: 2024, condomini: [], spese: [], versamenti: [], archivio: [] 
+    // --- CONFIGURAZIONE FIREBASE (Inserisci i tuoi dati qui) ---
+    const firebaseConfig = {
+        apiKey: "LA_TUA_API_KEY",
+        authDomain: "IL_TUO_PROGETTO.firebaseapp.com",
+        projectId: "IL_TUO_PROGETTO",
+        storageBucket: "IL_TUO_PROGETTO.appspot.com",
+        messagingSenderId: "ID",
+        appId: "ID_APP"
     };
+    
+    // Inizializza Firebase (Compat version per semplicità)
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    let localData = { anno: 2024, condomini: [], spese: [], versamenti: [] };
 
-    document.getElementById('s-data').valueAsDate = new Date();
+    // Sincronizzazione in tempo reale
+    function syncData() {
+        db.collection("condoData").doc("current").onSnapshot((doc) => {
+            if (doc.exists) {
+                localData = doc.data();
+                renderUI();
+            } else {
+                // Primo avvio: crea documento
+                db.collection("condoData").doc("current").set(localData);
+            }
+        });
+    }
 
-    function save() { localStorage.setItem('condoElite_v46', JSON.stringify(db)); updateUI(); }
+    // --- FUNZIONI CORE ---
+    function renderUI() {
+        document.getElementById('disp-anno').innerText = localData.anno;
+        document.getElementById('edit-anno').value = localData.anno;
+        
+        const totS = localData.spese.reduce((a, b) => a + b.imp, 0);
+        const totF = localData.versamenti.filter(v => v.causale === "Fondo Cassa").reduce((a, b) => a + b.imp, 0);
+        const totV = localData.versamenti.reduce((a, b) => a + b.imp, 0);
 
-    function toggleDropdown() {
-        const m = document.getElementById('settingsMenu');
-        m.style.display = m.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('tot-uscite').innerText = totS.toFixed(2) + "€";
+        document.getElementById('tot-fondo').innerText = totF.toFixed(2) + "€";
+        document.getElementById('tot-cassa').innerText = (totV - totS).toFixed(2) + "€";
+
+        // Select condomini
+        const sel = document.getElementById('v-condomino');
+        sel.innerHTML = localData.condomini.map((c, i) => `<option value="${i}">${c.nome}</option>`).join('');
+
+        // Tabella
+        document.getElementById('tab-millesimi').innerHTML = localData.condomini.map((c, i) => {
+            const quota = (totS * c.mill) / 1000;
+            const versato = localData.versamenti.filter(v => parseInt(v.idC) === i && v.causale === "Rata Condominiale").reduce((a, b) => a + b.imp, 0);
+            const saldo = versato - quota;
+            return `<tr>
+                <td><strong>${c.nome}</strong><br><small>${c.mill} mill.</small></td>
+                <td>${quota.toFixed(2)}€</td>
+                <td>${versato.toFixed(2)}€</td>
+                <td style="color:${saldo >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight:800">${saldo.toFixed(2)}€</td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function pushUpdate() {
+        await db.collection("condoData").doc("current").update(localData);
+    }
+
+    // --- AZIONI ---
+    function addSpesa() {
+        const desc = document.getElementById('spesa-desc').value;
+        const imp = parseFloat(document.getElementById('spesa-imp').value);
+        const data = document.getElementById('spesa-data').value;
+        if(desc && imp > 0) {
+            localData.spese.push({ desc, imp, data, ts: Date.now() });
+            pushUpdate();
+            document.getElementById('spesa-desc').value = '';
+            document.getElementById('spesa-imp').value = '';
+        }
+    }
+
+    function addEntrata() {
+        const idC = document.getElementById('v-condomino').value;
+        const imp = parseFloat(document.getElementById('v-imp').value);
+        const cau = document.getElementById('v-causale').value;
+        if(imp > 0) {
+            localData.versamenti.push({ idC, imp, causale: cau, data: new Date().toISOString().split('T')[0], ts: Date.now() });
+            pushUpdate();
+            document.getElementById('v-imp').value = '';
+        }
+    }
+
+    function addCondomino() {
+        const nome = document.getElementById('c-nome').value;
+        const mill = parseFloat(document.getElementById('c-mill').value);
+        if(nome && mill > 0) {
+            localData.condomini.push({ nome, mill });
+            pushUpdate();
+            document.getElementById('c-nome').value = '';
+            document.getElementById('c-mill').value = '';
+        }
+    }
+
+    // --- PDF PROFESSIONALE ---
+    function exportFullPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const totS = localData.spese.reduce((a, b) => a + b.imp, 0);
+
+        doc.setFontSize(20); doc.setTextColor(30, 64, 175);
+        doc.text(`RENDICONTO CONDOMINIALE ${localData.anno}`, 14, 20);
+        
+        doc.setFontSize(10); doc.setTextColor(100);
+        doc.text(`Documento generato il: ${new Date().toLocaleDateString()}`, 14, 28);
+
+        // Tabella 1: Dettaglio Spese
+        doc.setFontSize(14); doc.setTextColor(0);
+        doc.text("1. DETTAGLIO USCITE", 14, 40);
+        const rowsSpese = localData.spese.map(s => [s.data, s.desc, s.imp.toFixed(2) + " €"]);
+        doc.autoTable({
+            startY: 45, head: [['Data', 'Descrizione', 'Importo']], body: rowsSpese,
+            theme: 'striped', headStyles: { fillColor: [30, 64, 175] }
+        });
+
+        // Tabella 2: Riparto Millesimale
+        doc.text("2. RIPARTO MILLESIMALE E SALDI", 14, doc.lastAutoTable.finalY + 15);
+        const rowsRiparto = localData.condomini.map((c, i) => {
+            const quota = (totS * c.mill) / 1000;
+            const versato = localData.versamenti.filter(v => parseInt(v.idC) === i && v.causale === "Rata Condominiale").reduce((a, b) => a + b.imp, 0);
+            return [c.nome, c.mill, quota.toFixed(2) + " €", versato.toFixed(2) + " €", (versato - quota).toFixed(2) + " €"];
+        });
+
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 20,
+            head: [['Condomino', 'Mill.', 'Quota Dovuta', 'Versato', 'Saldo']],
+            body: rowsRiparto,
+            headStyles: { fillColor: [5, 150, 105] }
+        });
+
+        doc.save(`Bilancio_Condominio_${localData.anno}.pdf`);
     }
 
     function toggleModal(id) {
         const m = document.getElementById(id);
-        m.style.display = m.style.display === 'block' ? 'none' : 'block';
-        if(id === 'fullRegModal') renderRegistry();
-        document.getElementById('settingsMenu').style.display = 'none';
+        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    function cambiaAnno() {
-        db.anno = parseInt(document.getElementById('input-anno').value);
-        toggleModal('esercizioModal');
-        save();
-    }
-
-    function addCondomino() {
-        const n = document.getElementById('c-nome'), m = document.getElementById('c-mill');
-        if(n.value && m.value) { db.condomini.push({nome: n.value, mill: parseFloat(m.value)}); n.value=''; m.value=''; save(); }
-    }
-
-    function addSpesa() {
-        const d = document.getElementById('s-desc'), i = document.getElementById('s-imp'), dt = document.getElementById('s-data');
-        if(d.value && i.value > 0) {
-            db.spese.push({desc: d.value.toUpperCase(), imp: parseFloat(i.value), data: new Date(dt.value).toLocaleDateString('it-IT'), rawDate: dt.value, annoRiferimento: db.anno});
-            d.value=''; i.value=''; save();
-        }
-    }
-
-    function addVersamento() {
-        const id = document.getElementById('v-condomino'), imp = document.getElementById('v-imp'), cau = document.getElementById('v-causale');
-        if(id.value !== '' && imp.value > 0) {
-            db.versamenti.push({condominoId: id.value, nome: db.condomini[id.value].nome, imp: parseFloat(imp.value), causale: cau.value, data: new Date().toLocaleDateString('it-IT'), rawDate: new Date().toISOString(), annoRiferimento: db.anno});
-            imp.value=''; save();
-        }
-    }
-
-    function updateUI() {
-        document.getElementById('header-anno').innerText = db.anno;
-        document.getElementById('input-anno').value = db.anno;
-        
-        const totS = db.spese.reduce((a,b)=>a+b.imp, 0);
-        const totF = db.versamenti.filter(v=>v.causale==="Fondo Cassa").reduce((a,b)=>a+b.imp, 0);
-        const totV = db.versamenti.reduce((a,b)=>a+b.imp, 0);
-
-        document.getElementById('val-tot-riparto-header').innerText = totS.toFixed(0) + "€";
-        document.getElementById('val-fondo-auto-header').innerText = totF.toFixed(0) + "€";
-        document.getElementById('val-liquidita').innerText = (totV-totS).toFixed(0) + "€";
-
-        document.getElementById('v-condomino').innerHTML = '<option value="">Condomino...</option>' + 
-            db.condomini.map((c,i)=>`<option value="${i}">${c.nome}</option>`).join('');
-
-        document.getElementById('tab-main').innerHTML = db.condomini.map((c,idx)=>{
-            const q = (totS * c.mill)/1000;
-            const vR = db.versamenti.filter(x=>parseInt(x.condominoId)===idx && x.causale==="Rata Condominiale").reduce((a,b)=>a+b.imp,0);
-            return `<tr><td><b>${c.nome}</b><br><small>${c.mill} mill.</small></td><td>${q.toFixed(2)}</td><td>${vR.toFixed(2)}</td><td style="color:${vR-q>=0?'green':'red'}"><b>${(vR-q).toFixed(2)}</b></td></tr>`;
-        }).join('');
-
-        document.getElementById('tab-nomi').innerHTML = db.condomini.map((c,i)=>`
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; background:#f8fafc; padding:8px; border-radius:8px;">
-                <span>${c.nome}</span> <button onclick="elimina('condomini',${i})" style="border:none; background:none;">🗑️</button>
-            </div>
-        `).join('');
-
-        document.getElementById('archiveList').innerHTML = db.archivio.map((a,i)=>`
-            <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                <span>Esercizio ${a.anno}</span> <button onclick="generaBilancioPDFCompleto(db.archivio[${i}].snapshot)">PDF</button>
-            </div>
-        `).join('');
-    }
-
-    function chiudiEsercizio() {
-        if(!confirm("Archiviare l'esercizio e azzerare le spese?")) return;
-        db.archivio.push({anno: db.anno, dataChiusura: new Date().toLocaleString(), snapshot: JSON.parse(JSON.stringify(db))});
-        db.spese = [];
-        db.versamenti = db.versamenti.filter(v => v.causale === "Fondo Cassa");
-        db.anno++;
-        toggleModal('esercizioModal');
-        save();
-    }
-
-    function renderRegistry() {
-        const container = document.getElementById('full-registry-body');
-        let all = [...db.spese.map(s=>({...s, t:'USCITA'})), ...db.versamenti.map(v=>({...v, t:'ENTRATA'}))];
-        all.sort((a,b)=> new Date(b.rawDate) - new Date(a.rawDate));
-        container.innerHTML = all.map(m=>`
-            <div style="font-size:0.8rem; padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                <span>${m.data} - ${m.t === 'USCITA' ? m.desc : m.nome}</span>
-                <span style="color:${m.t==='ENTRATA'?'green':'red'}">${m.imp.toFixed(2)}€</span>
-            </div>
-        `).join('');
-    }
-
-    function elimina(t, i) { db[t].splice(i,1); save(); }
-
-    function generaBilancioPDFCompleto(data) {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.text(`BILANCIO ${data.anno}`, 14, 20);
-        doc.autoTable({ startY: 30, head: [['Nome', 'Mill.', 'Quota', 'Versato', 'Saldo']], body: data.condomini.map((c,i)=>{
-            const q = (data.spese.reduce((a,b)=>a+b.imp,0)*c.mill)/1000;
-            const v = data.versamenti.filter(x=>parseInt(x.condominoId)===i && x.causale==="Rata Condominiale").reduce((a,b)=>a+b.imp,0);
-            return [c.nome, c.mill, q.toFixed(2), v.toFixed(2), (v-q).toFixed(2)];
-        })});
-        doc.save(`Bilancio_${data.anno}.pdf`);
-    }
-
-    function exportBackup() {
-        const blob = new Blob([JSON.stringify(db)], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'backup_condo.json'; a.click();
-    }
-
-    updateUI();
+    // Avvio
+    document.getElementById('spesa-data').valueAsDate = new Date();
+    syncData();
 </script>
+
 </body>
 </html>
