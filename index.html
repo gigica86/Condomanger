@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CondoManager Platinum v6.2</title>
+    <title>CondoManager Pro v6.3</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -28,7 +28,6 @@
 
         .container { max-width: 1200px; margin: 10px auto; padding: 0 12px; }
 
-        /* Widget Riepilogo - Adattivi */
         .summary-bar { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -39,9 +38,8 @@
 
         .summary-card { background: white; padding: 12px; border-radius: 12px; border: 1px solid var(--b); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .summary-card small { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; }
-        .summary-card b { font-size: 15px; display: block; margin-top: 3px; font-family: "SF Mono", "Roboto Mono", monospace; }
+        .summary-card b { font-size: 15px; display: block; margin-top: 3px; font-family: "SF Mono", monospace; }
 
-        /* Grid Principale */
         .main-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 1024px) { .main-grid { grid-template-columns: 320px 1fr; } }
 
@@ -49,7 +47,6 @@
         .panel-header { background: #f8fafc; padding: 12px 15px; border-bottom: 1px solid var(--b); font-weight: 800; font-size: 11px; color: #475569; display: flex; justify-content: space-between; align-items: center; }
         .panel-body { padding: 15px; }
 
-        /* Input 16px previene lo zoom forzato su iOS */
         input, select { 
             width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; 
             margin-bottom: 10px; font-size: 16px; background: #fff; appearance: none;
@@ -65,24 +62,21 @@
         .btn-red { background: var(--d); color: white; }
         .btn:active { transform: scale(0.97); opacity: 0.8; }
 
-        /* Tabelle ottimizzate per Mobile */
         .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 400px; }
         th { text-align: left; background: #f8fafc; padding: 10px; border-bottom: 2px solid var(--b); font-size: 10px; color: #64748b; }
         td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
-        /* Modali Adattivi */
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; padding:15px; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 18px; padding: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
         .header-btns { display:flex; gap:6px; }
-        @media (max-width: 480px) { .header-btns .btn-gray { padding: 8px; font-size: 11px; } }
     </style>
 </head>
 <body>
 
 <header>
-    <div style="font-weight: 900; font-size: 14px; letter-spacing: -0.5px;">CONDOMANAGER</div>
+    <div style="font-weight: 900; font-size: 14px; letter-spacing: -0.5px;">CONDOMANAGER PRO</div>
     <div class="header-btns">
         <button class="btn btn-gray" style="width:auto; background:#334155; color:white; border:none;" onclick="toggleModal('regModal')">MOV.</button>
         <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('modalEsercizio')"><span id="header-anno">2024</span> ▾</button>
@@ -105,13 +99,10 @@
             <div class="panel-body">
                 <label style="font-size:10px; font-weight:800; color:#64748b;">DATA (GG/MM/AAAA)</label>
                 <input type="text" id="f-data" inputmode="numeric">
-                
                 <input type="text" id="f-desc" placeholder="Descrizione spesa">
                 <input type="number" id="f-imp" placeholder="Importo uscita €" inputmode="decimal">
                 <button class="btn btn-blue" style="width:100%" onclick="salvaMovimento('USCITA')">Registra Uscita</button>
-                
                 <hr style="margin:15px 0; border:0; border-top:1px solid var(--b);">
-                
                 <select id="f-condo"></select>
                 <select id="f-cau">
                     <option value="Rata Condominiale">Rata Condominiale</option>
@@ -157,22 +148,13 @@
 
 <div id="settingsModal" class="modal"><div class="modal-content" style="max-width:400px;">
     <h3>Impostazioni</h3>
-    <div style="display:flex; gap:8px; margin-bottom:15px;">
-        <input type="text" id="c-nome" placeholder="Nome" style="margin:0">
-        <input type="number" id="c-mill" placeholder="Mill." style="margin:0; width:80px;">
-        <button class="btn btn-blue" style="width:auto" onclick="salvaCondomino()">+</button>
-    </div>
-    <div id="lista-condo" style="max-height:200px; overflow-y:auto;"></div>
-    <hr style="margin:15px 0;">
-    <button class="btn btn-red" style="background:#000; width:100%" onclick="resetTotale()">⚠️ RESET TOTALE DATABASE</button>
+    <div style="display:flex; gap:8px; margin-bottom:15px;"><input type="text" id="c-nome" placeholder="Nome" style="margin:0"><input type="number" id="c-mill" placeholder="Mill." style="margin:0; width:80px;"><button class="btn btn-blue" style="width:auto" onclick="salvaCondomino()">+</button></div>
+    <div id="lista-condo"></div>
+    <hr style="margin:20px 0;"><button class="btn btn-red" style="background:#000; width:100%" onclick="resetTotale()">⚠️ RESET TOTALE DATABASE</button>
     <button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('settingsModal')">Chiudi</button>
 </div></div>
 
-<div id="archiveModal" class="modal"><div class="modal-content" style="max-width:450px;">
-    <h3>Storico</h3>
-    <div id="lista-archivi"></div>
-    <button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('archiveModal')">Chiudi</button>
-</div></div>
+<div id="archiveModal" class="modal"><div class="modal-content"><div id="lista-archivi"></div><button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('archiveModal')">Chiudi</button></div></div>
 
 <script>
     const firebaseConfig = {
@@ -189,9 +171,7 @@
     let state = { anno: 2024, condomini: [], spese: [], versamenti: [] };
 
     function initApp() {
-        fs.collection("gestione").doc("corrente").onSnapshot(doc => {
-            if (doc.exists) { state = doc.data(); renderUI(); }
-        });
+        fs.collection("gestione").doc("corrente").onSnapshot(doc => { if (doc.exists) { state = doc.data(); renderUI(); } });
         loadArchivio();
     }
 
@@ -217,15 +197,8 @@
 
         const regBody = document.getElementById('reg-table-body');
         let regHtml = "";
-        state.spese.forEach((s, idx) => {
-            regHtml += `<tr><td><small>${s.data}</small></td><td>${s.desc}</td><td style="color:red">-${Number(s.imp).toFixed(2)}</td><td><span onclick="delItem('SPESA', ${idx})" style="color:red; cursor:pointer;">X</span></td></tr>`;
-        });
-        state.versamenti.forEach((v, idx) => {
-            regHtml += `<tr><td><small>${v.data}</small></td><td>${state.condomini[v.id]?.nome} (${v.cau.charAt(0)})</td><td style="color:green">+${Number(v.imp).toFixed(2)}</td><td>
-                <span onclick="ricevuta(${idx})" style="color:blue; cursor:pointer; margin-right:8px;">PDF</span>
-                <span onclick="delItem('VERS', ${idx})" style="color:red; cursor:pointer;">X</span>
-            </td></tr>`;
-        });
+        state.spese.forEach((s, idx) => { regHtml += `<tr><td><small>${s.data}</small></td><td>${s.desc}</td><td style="color:red">-${Number(s.imp).toFixed(2)}</td><td><span onclick="delItem('SPESA', ${idx})" style="color:red; cursor:pointer;">X</span></td></tr>`; });
+        state.versamenti.forEach((v, idx) => { regHtml += `<tr><td><small>${v.data}</small></td><td>${state.condomini[v.id]?.nome} (${v.cau.charAt(0)})</td><td style="color:green">+${Number(v.imp).toFixed(2)}</td><td><span onclick="ricevuta(${idx})" style="color:blue; cursor:pointer; margin-right:8px;">PDF</span><span onclick="delItem('VERS', ${idx})" style="color:red; cursor:pointer;">X</span></td></tr>`; });
         regBody.innerHTML = regHtml;
         document.getElementById('lista-condo').innerHTML = state.condomini.map((c, i) => `<div style="padding:10px; border-bottom:1px solid #eee;">${c.nome} <span onclick="delItem('CONDO', ${i})" style="float:right; color:red; cursor:pointer;">✕</span></div>`).join('');
     }
@@ -245,72 +218,39 @@
         document.getElementById('f-desc').value = ""; document.getElementById('f-imp').value = ""; document.getElementById('f-vimp').value = "";
     }
 
-    async function delItem(type, i) {
-        if(!confirm("Eliminare?")) return;
-        if(type === 'SPESA') state.spese.splice(i, 1);
-        if(type === 'VERS') state.versamenti.splice(i, 1);
-        if(type === 'CONDO') state.condomini.splice(i, 1);
-        await fs.collection("gestione").doc("corrente").set(state);
-    }
+    async function delItem(type, i) { if(confirm("Eliminare?")) { if(type==='SPESA') state.spese.splice(i,1); if(type==='VERS') state.versamenti.splice(i,1); if(type==='CONDO') state.condomini.splice(i,1); await fs.collection("gestione").doc("corrente").set(state); } }
 
-    async function resetTotale() {
-        const p = prompt("Password:");
-        if(p === "1305") {
-            if(confirm("ELIMINARE TUTTO?")) {
-                await fs.collection("gestione").doc("corrente").set({ anno: 2024, condomini: [], spese: [], versamenti: [] });
-                const snap = await fs.collection("archivio").get();
-                snap.forEach(doc => doc.ref.delete());
-                location.reload();
-            }
-        }
-    }
+    async function resetTotale() { if(prompt("Password:") === "1305") { if(confirm("ELIMINARE TUTTO?")) { await fs.collection("gestione").doc("corrente").set({ anno: 2024, condomini: [], spese: [], versamenti: [] }); const snap = await fs.collection("archivio").get(); snap.forEach(doc => doc.ref.delete()); location.reload(); } } }
 
     function stampaQuote() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const totS = state.spese.reduce((a,b) => a + Number(b.imp), 0);
         const totF = state.versamenti.filter(v => v.cau === "Fondo Cassa").reduce((a,b) => a + Number(b.imp), 0);
         doc.setFontSize(16); doc.text("PROSPETTO QUOTE - ANNO " + state.anno, 14, 20);
-        doc.setFontSize(10); doc.text("SITUAZIONE FONDO CASSA: " + totF.toFixed(2) + " €", 14, 28);
-        doc.autoTable({ startY: 35, head: [['Data', 'Spesa', 'Importo €']], body: state.spese.map(s => [s.data, s.desc, Number(s.imp).toFixed(2)]) });
-        doc.autoTable({ startY: doc.lastAutoTable.finalY + 10, head: [['Condomino', 'Mill.', 'Quota €']], body: state.condomini.map(c => [c.nome, c.mill, ((totS * c.mill)/1000).toFixed(2)]) });
+        doc.setFontSize(11); doc.setFillColor(240, 240, 240); doc.rect(14, 25, 180, 10, 'F'); doc.text("SALDO ATTUALE FONDO CASSA: " + totF.toFixed(2) + " €", 18, 31);
+        doc.text("DETTAGLIO USCITE:", 14, 45);
+        doc.autoTable({ startY: 48, head: [['Data', 'Descrizione', 'Importo €']], body: state.spese.map(s => [s.data, s.desc, Number(s.imp).toFixed(2)]), foot: [['', 'TOTALE USCITE', totS.toFixed(2) + " €"]] });
+        doc.text("RIPARTO MILLESIMALE:", 14, doc.lastAutoTable.finalY + 15);
+        doc.autoTable({ startY: doc.lastAutoTable.finalY + 20, head: [['Condomino', 'Mill.', 'Quota €']], body: state.condomini.map(c => [c.nome, c.mill, ((totS * c.mill)/1000).toFixed(2)]) });
         doc.save("Quote.pdf");
     }
 
-    async function proceduraChiusura() {
-        if(!confirm("Chiudere l'anno?")) return;
-        generaBilancioCompleto(state);
-        await fs.collection("archivio").doc("anno_" + state.anno).set(state);
-        const f = state.versamenti.filter(v => v.cau === "Fondo Cassa");
-        state.anno++; state.spese = []; state.versamenti = f;
-        await fs.collection("gestione").doc("corrente").set(state);
-        toggleModal('modalEsercizio');
-    }
+    async function proceduraChiusura() { if(confirm("Chiudere l'anno?")) { generaBilancioCompleto(state); await fs.collection("archivio").doc("anno_" + state.anno).set(state); const f = state.versamenti.filter(v => v.cau === "Fondo Cassa"); state.anno++; state.spese = []; state.versamenti = f; await fs.collection("gestione").doc("corrente").set(state); toggleModal('modalEsercizio'); } }
 
     function generaBilancioCompleto(d) {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const totS = d.spese.reduce((a,b) => a + Number(b.imp), 0);
-        doc.text("BILANCIO ANNO " + d.anno, 14, 20);
-        doc.autoTable({ startY: 30, head: [['Data', 'Spesa', '€']], body: d.spese.map(s => [s.data, s.desc, Number(s.imp).toFixed(2)]) });
-        doc.autoTable({ startY: doc.lastAutoTable.finalY + 10, head: [['Condomino', 'Mill.', 'Quota', 'Versato', 'Saldo']], body: d.condomini.map((c, i) => {
-            const q = (totS * c.mill)/1000;
-            const v = d.versamenti.filter(x => parseInt(x.id) === i && x.cau === "Rata Condominiale").reduce((a,b) => a + Number(b.imp), 0);
-            return [c.nome, c.mill, q.toFixed(2), v.toFixed(2), (v-q).toFixed(2)];
-        })});
+        const totF = d.versamenti.filter(v => v.cau === "Fondo Cassa").reduce((a,b) => a + Number(b.imp), 0);
+        doc.setFontSize(18); doc.text("BILANCIO CONSUNTIVO ANNO " + d.anno, 14, 20);
+        doc.setFontSize(10); doc.text(`Totale Uscite: ${totS.toFixed(2)} €`, 14, 28); doc.text(`Saldo Residuo Fondo Cassa: ${totF.toFixed(2)} €`, 14, 33);
+        doc.autoTable({ startY: 40, head: [['Data', 'Spesa', '€']], body: d.spese.map(s => [s.data, s.desc, Number(s.imp).toFixed(2)]), headStyles: { fillColor: [100, 100, 100] } });
+        doc.text("SITUAZIONE INDIVIDUALE E SALDI:", 14, doc.lastAutoTable.finalY + 15);
+        doc.autoTable({ startY: doc.lastAutoTable.finalY + 20, head: [['Condomino', 'Mill.', 'Quota', 'Versato', 'Saldo']], body: d.condomini.map((c, i) => { const q = (totS * c.mill)/1000; const v = d.versamenti.filter(x => parseInt(x.id) === i && x.cau === "Rata Condominiale").reduce((a,b) => a + Number(b.imp), 0); return [c.nome, c.mill, q.toFixed(2), v.toFixed(2), (v-q).toFixed(2)]; }), headStyles: { fillColor: [37, 99, 235] } });
         doc.save(`Bilancio_${d.anno}.pdf`);
     }
 
-    function ricevuta(i) {
-        const v = state.versamenti[i]; const c = state.condomini[v.id];
-        const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: [105, 148] });
-        doc.text("RICEVUTA PAGAMENTO", 10, 20);
-        doc.setFontSize(10); doc.text(`Data: ${v.data}\nCondomino: ${c.nome}\nCausale: ${v.cau}\nImporto: ${Number(v.imp).toFixed(2)} €`, 10, 40);
-        doc.save(`Ricevuta_${v.data.replace(/\//g,'-')}.pdf`);
-    }
-
-    async function salvaCondomino() {
-        const n = document.getElementById('c-nome').value, m = parseFloat(document.getElementById('c-mill').value);
-        if(n && !isNaN(m)) { state.condomini.push({nome:n, mill:m}); await fs.collection("gestione").doc("corrente").set(state); }
-    }
+    function ricevuta(i) { const v = state.versamenti[i]; const c = state.condomini[v.id]; const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: [105, 148] }); doc.text("RICEVUTA PAGAMENTO", 10, 20); doc.setFontSize(10); doc.text(`Data: ${v.data}\nCondomino: ${c.nome}\nCausale: ${v.cau}\nImporto: ${Number(v.imp).toFixed(2)} €`, 10, 40); doc.save(`Ricevuta_${v.data.replace(/\//g,'-')}.pdf`); }
+    async function salvaCondomino() { const n = document.getElementById('c-nome').value, m = parseFloat(document.getElementById('c-mill').value); if(n && !isNaN(m)) { state.condomini.push({nome:n, mill:m}); await fs.collection("gestione").doc("corrente").set(state); } }
     async function aggiornaAnno() { state.anno = parseInt(document.getElementById('input-edit-anno').value); await fs.collection("gestione").doc("corrente").set(state); toggleModal('modalEsercizio'); }
     function toggleModal(id) { const m = document.getElementById(id); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
     function loadArchivio() { fs.collection("archivio").onSnapshot(snap => { document.getElementById('lista-archivi').innerHTML = snap.docs.map(doc => `<div style="padding:10px; border-bottom:1px solid #eee;">Anno ${doc.data().anno} <button class="btn btn-gray" style="float:right; padding:4px 8px;" onclick='generaBilancioCompleto(${JSON.stringify(doc.data())})'>PDF</button></div>`).join(''); }); }
