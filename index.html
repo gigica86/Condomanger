@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>CondoManager Pro v5.2</title>
+    <title>CondoManager Pro v5.3</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -11,68 +11,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { 
-            --primary: #0f172a; --accent: #2563eb; --border: #e2e8f0;
-            --success: #166534; --danger: #b91c1c; --text: #334155;
-        }
-
-        body { 
-            font-family: "Inter", -apple-system, sans-serif; 
-            background: #f8fafc; color: var(--text); margin: 0; font-size: 13px;
-        }
-
-        header { 
-            background: var(--primary); color: white; padding: 10px 16px;
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 1000;
-        }
-
+        :root { --primary: #0f172a; --accent: #2563eb; --border: #e2e8f0; --success: #166534; --danger: #b91c1c; --text: #334155; }
+        body { font-family: "Inter", -apple-system, sans-serif; background: #f8fafc; color: var(--text); margin: 0; font-size: 13px; }
+        header { background: var(--primary); color: white; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .container { max-width: 1200px; margin: 10px auto; padding: 0 10px; }
-
-        /* Status Pills */
-        .esercizio-pill {
-            background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 6px;
-            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;
-        }
-        .esercizio-pill:hover { background: rgba(255,255,255,0.2); }
-
+        .esercizio-pill { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 700; }
         .summary-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .summary-card { 
-            flex: 1; background: white; padding: 12px; border: 1px solid var(--border);
-            border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .summary-card small { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600; }
+        .summary-card { flex: 1; background: white; padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
+        .summary-card small { font-size: 10px; color: #64748b; text-transform: uppercase; }
         .summary-card b { font-size: 15px; color: var(--primary); display: block; }
-
         .main-grid { display: grid; grid-template-columns: 280px 1fr; gap: 15px; }
         @media (max-width: 850px) { .main-grid { grid-template-columns: 1fr; } }
-
-        .panel { background: white; border: 1px solid var(--border); border-radius: 6px; }
+        .panel { background: white; border: 1px solid var(--border); border-radius: 6px; height: fit-content; }
         .panel-header { background: #f8fafc; padding: 10px 14px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 11px; }
         .panel-body { padding: 14px; }
-
-        input, select { 
-            width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px;
-            margin-bottom: 12px; font-size: 14px; box-sizing: border-box;
-        }
-
-        .btn { 
-            padding: 9px 14px; border-radius: 4px; border: 1px solid transparent; 
-            cursor: pointer; font-weight: 600; font-size: 12px; width: 100%; transition: 0.1s;
-        }
+        input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background: #fff; }
+        .btn { padding: 9px 14px; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; width: 100%; transition: 0.1s; }
         .btn-blue { background: var(--accent); color: white; }
-        .btn-gray { background: #f1f5f9; color: #475569; border-color: var(--border); }
+        .btn-gray { background: #f1f5f9; color: #475569; border: 1px solid var(--border); }
         .btn-red { background: var(--danger); color: white; }
-
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; background: #f8fafc; padding: 10px; border-bottom: 2px solid var(--border); font-size: 11px; color: #64748b; }
         td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; }
-
-        .modal { 
-            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); 
-            z-index:2000; padding:20px; align-items: center; justify-content: center;
-        }
-        .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 8px; padding: 20px; }
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; padding:20px; align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 8px; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -80,9 +42,7 @@
 <header>
     <div style="font-weight: 800; font-size: 15px;">CONDOMANAGER <span style="font-weight: 300;">PRO</span></div>
     <div style="display:flex; gap:10px;">
-        <div class="esercizio-pill" onclick="toggleModal('modalEsercizio')">
-            <span id="label-anno">Esercizio 2024</span> ▾
-        </div>
+        <div class="esercizio-pill" onclick="toggleModal('modalEsercizio')"><span id="label-anno">Esercizio ---</span> ▾</div>
         <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('archiveModal')">STORICO</button>
         <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('settingsModal')">⚙️</button>
     </div>
@@ -97,41 +57,31 @@
 
     <div class="main-grid">
         <div class="panel">
-            <div class="panel-header">NUOVA OPERAZIONE</div>
+            <div class="panel-header">REGISTRA MOVIMENTO</div>
             <div class="panel-body">
                 <input type="date" id="f-data">
                 <input type="text" id="f-desc" placeholder="Descrizione uscita">
-                <input type="number" id="f-imp" placeholder="Importo €" step="0.01">
-                <button class="btn btn-blue" onclick="addMovimento('USCITA')">Registra Uscita</button>
-                
+                <input type="number" id="f-imp" placeholder="Importo €">
+                <button class="btn btn-blue" onclick="salvaMovimento('USCITA')">Registra Uscita</button>
                 <hr style="margin:20px 0; border:0; border-top:1px solid var(--border);">
-                
-                <select id="f-condo"></select>
+                <select id="f-condo"><option value="">Caricamento...</option></select>
                 <select id="f-cau">
                     <option value="Rata Condominiale">Rata Condominiale</option>
                     <option value="Fondo Cassa">Fondo Cassa</option>
                 </select>
-                <input type="number" id="f-vimp" placeholder="Versamento €" step="0.01">
-                <button class="btn btn-blue" style="background:var(--success);" onclick="addMovimento('ENTRATA')">Registra Entrata</button>
+                <input type="number" id="f-vimp" placeholder="Importo €">
+                <button class="btn btn-blue" style="background:var(--success);" onclick="salvaMovimento('ENTRATA')">Registra Pagamento</button>
             </div>
         </div>
 
         <div class="panel">
             <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
-                SITUAZIONE CONTABILE
+                SITUAZIONE CONTABILE CORRENTE
                 <button class="btn btn-gray" style="width:auto; padding:4px 10px;" onclick="stampaBilancio()">REPORT PDF</button>
             </div>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>CONDOMINO</th>
-                            <th>MILL.</th>
-                            <th>QUOTA</th>
-                            <th>VERSATO</th>
-                            <th>SALDO</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>CONDOMINO</th><th>MILL.</th><th>QUOTA</th><th>VERSATO</th><th>SALDO</th></tr></thead>
                     <tbody id="main-table-body"></tbody>
                 </table>
             </div>
@@ -139,67 +89,67 @@
     </div>
 </div>
 
-<!-- MODALE GESTIONE ESERCIZIO (Integrato) -->
+<!-- MODALE GESTIONE ESERCIZIO -->
 <div id="modalEsercizio" class="modal">
     <div class="modal-content">
-        <h4 style="margin-top:0">Gestione Esercizio</h4>
-        <p style="font-size:11px; color:#64748b;">Modifica l'anno fiscale attuale o chiudi il bilancio.</p>
-        
-        <label style="font-size:11px; font-weight:700;">ANNO CORRENTE</label>
+        <h4>Esercizio Fiscale</h4>
+        <label>ANNO ATTIVO</label>
         <input type="number" id="input-edit-anno">
-        <button class="btn btn-blue" onclick="updateAnnoSolo()">Aggiorna Anno</button>
-        
+        <button class="btn btn-blue" onclick="aggiornaAnno()">Salva Nuovo Anno</button>
         <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-        
-        <button class="btn btn-red" onclick="proceduraChiusura()">🔒 Chiudi e Archivia Anno</button>
+        <button class="btn btn-red" onclick="proceduraChiusura()">🔒 Chiudi Bilancio e Archivia</button>
         <button class="btn btn-gray" style="margin-top:10px;" onclick="toggleModal('modalEsercizio')">Annulla</button>
     </div>
 </div>
 
-<!-- MODALE STORICO -->
-<div id="archiveModal" class="modal">
-    <div class="modal-content" style="max-width:500px;">
-        <h4>Storico Bilanci</h4>
-        <div id="lista-archivi" style="max-height:300px; overflow-y:auto;"></div>
-        <button class="btn btn-gray" style="margin-top:15px;" onclick="toggleModal('archiveModal')">Chiudi</button>
-    </div>
-</div>
-
-<!-- MODALE CONFIG -->
+<!-- Altri Modali (Settings, Archivio) -->
 <div id="settingsModal" class="modal">
     <div class="modal-content">
-        <h4>Configurazione Condomini</h4>
-        <div style="display:flex; gap:5px; margin-bottom:15px;">
+        <h4>Anagrafica Condomini</h4>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
             <input type="text" id="c-nome" placeholder="Nome" style="margin:0">
             <input type="number" id="c-mill" placeholder="Mill." style="margin:0; width:80px;">
-            <button class="btn btn-blue" style="width:auto" onclick="addCondomino()">+</button>
+            <button class="btn btn-blue" style="width:auto" onclick="salvaCondomino()">+</button>
         </div>
-        <div id="lista-condo" style="max-height:200px; overflow-y:auto; border:1px solid #eee;"></div>
+        <div id="lista-condo" style="max-height:250px; overflow-y:auto; border:1px solid #eee;"></div>
         <button class="btn btn-gray" style="margin-top:15px;" onclick="toggleModal('settingsModal')">Chiudi</button>
     </div>
 </div>
 
+<div id="archiveModal" class="modal">
+    <div class="modal-content">
+        <h4>Archivio Bilanci</h4>
+        <div id="lista-archivi"></div>
+        <button class="btn btn-gray" style="margin-top:15px;" onclick="toggleModal('archiveModal')">Chiudi</button>
+    </div>
+</div>
+
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
-        apiKey: "AIzaSy...", 
-        projectId: "condo-manager-pro",
-        appId: "1:..."
+        apiKey: "SOSTITUISCI_CON_TUA_KEY",
+        projectId: "SOSTITUISCI_CON_TUO_ID",
+        appId: "SOSTITUISCI_CON_TUO_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     const fs = firebase.firestore();
 
     let state = { anno: 2024, condomini: [], spese: [], versamenti: [] };
 
+    // Inizializzazione e Sincronizzazione Real-Time
     function initApp() {
         fs.collection("gestione").doc("corrente").onSnapshot(doc => {
             if (doc.exists) {
                 state = doc.data();
-                renderAll();
+                renderUI();
+            } else {
+                fs.collection("gestione").doc("corrente").set(state);
             }
         });
+        loadArchivio();
     }
 
-    function renderAll() {
+    function renderUI() {
         document.getElementById('label-anno').innerText = "Esercizio " + state.anno;
         document.getElementById('input-edit-anno').value = state.anno;
         
@@ -207,9 +157,9 @@
         const totF = state.versamenti.filter(v => v.cau === "Fondo Cassa").reduce((a,b) => a + b.imp, 0);
         const totV = state.versamenti.reduce((a,b) => a + b.imp, 0);
 
-        document.getElementById('st-uscite').innerText = totS.toLocaleString('it-IT', {style:'currency', currency:'EUR'});
-        document.getElementById('st-fondo').innerText = totF.toLocaleString('it-IT', {style:'currency', currency:'EUR'});
-        document.getElementById('st-liquidita').innerText = (totV - totS).toLocaleString('it-IT', {style:'currency', currency:'EUR'});
+        document.getElementById('st-uscite').innerText = totS.toFixed(2) + " €";
+        document.getElementById('st-fondo').innerText = totF.toFixed(2) + " €";
+        document.getElementById('st-liquidita').innerText = (totV - totS).toFixed(2) + " €";
 
         document.getElementById('f-condo').innerHTML = state.condomini.map((c, i) => `<option value="${i}">${c.nome}</option>`).join('');
 
@@ -218,78 +168,76 @@
             const quota = (totS * c.mill) / 1000;
             const versato = state.versamenti.filter(v => parseInt(v.id) === i && v.cau === "Rata Condominiale").reduce((a,b) => a + b.imp, 0);
             const saldo = versato - quota;
-            return `<tr>
-                <td><b>${c.nome}</b></td>
-                <td>${c.mill}</td>
-                <td>${quota.toFixed(2)} €</td>
-                <td>${versato.toFixed(2)} €</td>
-                <td style="font-weight:800; color:${saldo >= 0 ? 'var(--success)' : 'var(--danger)'}">${saldo.toFixed(2)} €</td>
-            </tr>`;
+            return `<tr><td><b>${c.nome}</b></td><td>${c.mill}</td><td>${quota.toFixed(2)}</td><td>${versato.toFixed(2)}</td><td style="font-weight:700; color:${saldo >= 0 ? 'var(--success)' : 'var(--danger)'}">${saldo.toFixed(2)}</td></tr>`;
         }).join('');
 
         document.getElementById('lista-condo').innerHTML = state.condomini.map((c, i) => `
-            <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #f1f5f9; font-size:12px;">
-                ${c.nome} (${c.mill}) <span onclick="delCondo(${i})" style="color:red; cursor:pointer;">✕</span>
-            </div>
-        `).join('');
-
-        loadArchivio();
+            <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee;">
+                ${c.nome} (${c.mill}) <span onclick="eliminaCondo(${i})" style="color:red; cursor:pointer;">✕</span>
+            </div>`).join('');
     }
 
-    async function updateAnnoSolo() {
+    // --- LOGICA DI SALVATAGGIO ---
+    async function salvaMovimento(tipo) {
+        if(tipo === 'USCITA') {
+            const d = document.getElementById('f-desc').value, i = parseFloat(document.getElementById('f-imp').value), dt = document.getElementById('f-data').value;
+            if(!d || isNaN(i)) return alert("Dati mancanti");
+            state.spese.push({ desc: d, imp: i, data: dt });
+        } else {
+            const id = document.getElementById('f-condo').value, i = parseFloat(document.getElementById('f-vimp').value), cau = document.getElementById('f-cau').value;
+            if(isNaN(i) || id === "") return alert("Dati mancanti");
+            state.versamenti.push({ id: id, imp: i, cau: cau, data: new Date().toISOString().split('T')[0] });
+        }
+        await fs.collection("gestione").doc("corrente").set(state);
+        document.getElementById('f-desc').value = ''; document.getElementById('f-imp').value = ''; document.getElementById('f-vimp').value = '';
+    }
+
+    async function salvaCondomino() {
+        const n = document.getElementById('c-nome').value, m = parseFloat(document.getElementById('c-mill').value);
+        if(!n || isNaN(m)) return alert("Inserisci nome e millesimi");
+        state.condomini.push({ nome: n, mill: m });
+        await fs.collection("gestione").doc("corrente").set(state);
+        document.getElementById('c-nome').value = ''; document.getElementById('c-mill').value = '';
+    }
+
+    async function aggiornaAnno() {
         const nuovo = parseInt(document.getElementById('input-edit-anno').value);
         if(!nuovo) return;
         state.anno = nuovo;
-        await fs.collection("gestione").doc("corrente").update({ anno: nuovo });
+        await fs.collection("gestione").doc("corrente").set(state);
         toggleModal('modalEsercizio');
     }
 
     async function proceduraChiusura() {
-        if(!confirm("⚠️ ATTENZIONE: Questa operazione congela i dati del " + state.anno + " nello storico e resetta le spese. Procedere?")) return;
+        if(!confirm("Confermi la chiusura? I dati del " + state.anno + " verranno archiviati.")) return;
         try {
             await fs.collection("archivio").doc("anno_" + state.anno).set({...state, dataChiusura: new Date().toISOString()});
-            const fondoCassa = state.versamenti.filter(v => v.cau === "Fondo Cassa");
+            const fondo = state.versamenti.filter(v => v.cau === "Fondo Cassa");
             state.anno++;
             state.spese = [];
-            state.versamenti = fondoCassa; 
+            state.versamenti = fondo;
             await fs.collection("gestione").doc("corrente").set(state);
             toggleModal('modalEsercizio');
-            alert("Esercizio Chiuso. Creato nuovo anno " + state.anno);
-        } catch(e) { alert("Errore"); }
+            loadArchivio();
+            alert("Bilancio Archiviato!");
+        } catch(e) { alert("Errore connessione."); }
     }
 
-    async function addMovimento(tipo) {
-        if(tipo === 'USCITA') {
-            const d = document.getElementById('f-desc').value, i = parseFloat(document.getElementById('f-imp').value), dt = document.getElementById('f-data').value;
-            if(!d || isNaN(i)) return;
-            state.spese.push({ desc: d, imp: i, data: dt });
-        } else {
-            const id = document.getElementById('f-condo').value, i = parseFloat(document.getElementById('f-vimp').value), cau = document.getElementById('f-cau').value;
-            if(isNaN(i)) return;
-            state.versamenti.push({ id, imp: i, cau: cau, data: new Date().toISOString().split('T')[0] });
+    async function eliminaCondo(i) {
+        if(confirm("Eliminare?")) {
+            state.condomini.splice(i, 1);
+            await fs.collection("gestione").doc("corrente").set(state);
         }
-        await fs.collection("gestione").doc("corrente").update(state);
-        document.getElementById('f-desc').value = ''; document.getElementById('f-imp').value = ''; document.getElementById('f-vimp').value = '';
     }
-
-    async function addCondomino() {
-        const n = document.getElementById('c-nome').value, m = parseFloat(document.getElementById('c-mill').value);
-        if(!n || isNaN(m)) return;
-        state.condomini.push({ nome: n, mill: m });
-        await fs.collection("gestione").doc("corrente").update(state);
-        document.getElementById('c-nome').value = ''; document.getElementById('c-mill').value = '';
-    }
-
-    async function delCondo(i) { if(confirm("Eliminare?")) { state.condomini.splice(i, 1); await fs.collection("gestione").doc("corrente").update(state); } }
 
     async function loadArchivio() {
         const snap = await fs.collection("archivio").get();
         const div = document.getElementById('lista-archivi');
         div.innerHTML = snap.empty ? "Nessun archivio." : snap.docs.map(doc => {
             const d = doc.data();
-            return `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; align-items:center;">
+            return `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
                 <span><b>Bilancio ${d.anno}</b></span>
-                <button class="btn btn-gray" style="width:auto; padding:4px 8px;" onclick='generaPDFStorico(${JSON.stringify(d)})'>PDF</button>
+                <button onclick='generaPDFStorico(${JSON.stringify(d)})' style="padding:4px 8px;">Scarica PDF</button>
             </div>`;
         }).join('');
     }
@@ -304,19 +252,18 @@
     function generaPDFStorico(data) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.setFontSize(18); doc.text("RENDICONTO CONDOMINIALE - ANNO " + data.anno, 14, 20);
-        doc.setFontSize(12); doc.text("1. DETTAGLIO USCITE", 14, 30);
+        doc.setFontSize(16); doc.text("BILANCIO " + data.anno, 14, 20);
+        doc.setFontSize(10); doc.text("DETTAGLIO USCITE", 14, 30);
         doc.autoTable({
             startY: 35,
             head: [['Data', 'Descrizione', 'Importo']],
             body: data.spese.map(s => [s.data, s.desc, s.imp.toFixed(2) + " €"]),
-            foot: [['', 'TOTALE USCITE', data.spese.reduce((a,b)=>a+b.imp,0).toFixed(2) + " €"]]
         });
-        doc.text("2. RIPARTO MILLESIMALE", 14, doc.lastAutoTable.finalY + 15);
+        doc.text("RIPARTO", 14, doc.lastAutoTable.finalY + 15);
         const totS = data.spese.reduce((a,b) => a + b.imp, 0);
         doc.autoTable({
             startY: doc.lastAutoTable.finalY + 20,
-            head: [['Condomino', 'Mill.', 'Quota Dovuta', 'Versato', 'Saldo']],
+            head: [['Condomino', 'Mill.', 'Quota', 'Versato', 'Saldo']],
             body: data.condomini.map((c, i) => {
                 const q = (totS * c.mill) / 1000;
                 const v = data.versamenti.filter(v => parseInt(v.id) === i && v.cau === "Rata Condominiale").reduce((a,b) => a + b.imp, 0);
