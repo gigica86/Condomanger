@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>CondoManager Pro v5.7</title>
+    <title>CondoManager Pro v5.6</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -11,26 +11,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --p: #0f172a; --a: #2563eb; --b: #e2e8f0; --s: #166534; --d: #b91c1c; --t: #334155; }
-        body { font-family: "Inter", sans-serif; background: #f1f5f9; color: var(--t); margin: 0; font-size: 13px; }
-        header { background: var(--p); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        :root { 
+            --primary: #0f172a; --accent: #2563eb; --border: #e2e8f0; 
+            --success: #166534; --danger: #b91c1c; --text: #334155; 
+        }
+        body { font-family: "Inter", -apple-system, system-ui, sans-serif; background: #f1f5f9; color: var(--text); margin: 0; font-size: 13px; }
+        header { background: var(--primary); color: white; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .container { max-width: 1200px; margin: 12px auto; padding: 0 12px; }
+        .esercizio-pill { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; border: 1px solid rgba(255,255,255,0.2); font-size: 12px; }
         .summary-bar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .summary-card { flex: 1; background: white; padding: 12px; border: 1px solid var(--b); border-radius: 8px; }
+        .summary-card { flex: 1; background: white; padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+        .summary-card b { font-size: 16px; color: var(--primary); display: block; }
         .main-grid { display: grid; grid-template-columns: 300px 1fr; gap: 15px; }
         @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
-        .panel { background: white; border: 1px solid var(--b); border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
-        .panel-header { background: #f8fafc; padding: 10px 14px; border-bottom: 1px solid var(--b); font-weight: 700; font-size: 11px; color: #64748b; }
+        .panel { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
+        .panel-header { background: #f8fafc; padding: 10px 14px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 11px; color: #64748b; }
         .panel-body { padding: 15px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid var(--b); border-radius: 6px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background: #fff; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; font-size: 14px; box-sizing: border-box; background: #fff; }
         .btn { padding: 10px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; width: 100%; }
-        .btn-blue { background: var(--a); color: white; }
-        .btn-gray { background: #f1f5f9; color: #475569; border: 1px solid var(--b); }
-        .btn-red { background: var(--d); color: white; }
+        .btn-blue { background: var(--accent); color: white; }
+        .btn-gray { background: #f1f5f9; color: #475569; border: 1px solid var(--border); }
+        .btn-red { background: var(--danger); color: white; }
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #f8fafc; padding: 10px; border-bottom: 2px solid var(--b); font-size: 11px; }
-        td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
-        .del-btn { color: var(--d); cursor: pointer; font-weight: bold; border: 1px solid var(--d); border-radius: 4px; padding: 2px 6px; font-size: 10px; }
+        th { text-align: left; background: #f8fafc; padding: 12px 10px; border-bottom: 2px solid var(--border); font-size: 11px; }
+        td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; }
+        .del-x { color: var(--danger); cursor: pointer; font-weight: bold; padding: 0 5px; }
         .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; padding:20px; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; width: 100%; max-width: 450px; border-radius: 12px; padding: 24px; }
     </style>
@@ -40,9 +45,7 @@
 <header>
     <div style="font-weight: 800; font-size: 15px;">CONDOMANAGER PRO</div>
     <div style="display:flex; gap:10px;">
-        <div style="background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:5px; cursor:pointer;" onclick="toggleModal('modalEsercizio')">
-            <span id="label-anno">---</span> ▾
-        </div>
+        <div class="esercizio-pill" onclick="toggleModal('modalEsercizio')"><span id="label-anno">---</span> ▾</div>
         <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('archiveModal')">STORICO</button>
         <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('settingsModal')">⚙️</button>
     </div>
@@ -50,46 +53,50 @@
 
 <div class="container">
     <div class="summary-bar">
-        <div class="summary-card"><small>USCITE</small><b id="st-uscite">0,00 €</b></div>
-        <div class="summary-card"><small>FONDO</small><b id="st-fondo" style="color:var(--s)">0,00 €</b></div>
-        <div class="summary-card"><small>CASSA</small><b id="st-liquidita">0,00 €</b></div>
+        <div class="summary-card"><small>Uscite</small><b id="st-uscite">0,00 €</b></div>
+        <div class="summary-card"><small>Fondo Cassa</small><b id="st-fondo" style="color:var(--success)">0,00 €</b></div>
+        <div class="summary-card"><small>Liquidità</small><b id="st-liquidita">0,00 €</b></div>
     </div>
 
     <div class="main-grid">
         <div class="panel">
-            <div class="panel-header">REGISTRA MOVIMENTI</div>
+            <div class="panel-header">Nuovo Inserimento</div>
             <div class="panel-body">
                 <input type="date" id="f-data">
-                <input type="text" id="f-desc" placeholder="Causale uscita">
+                <input type="text" id="f-desc" placeholder="Descrizione spesa">
                 <input type="number" id="f-imp" placeholder="Importo €">
-                <button class="btn btn-blue" onclick="salvaMovimento('USCITA')">Salva Uscita</button>
-                <hr style="margin:15px 0; border:0; border-top:1px solid var(--b);">
-                <select id="f-condo"><option value="">Caricamento...</option></select>
+                <button class="btn btn-blue" onclick="salvaMovimento('USCITA')">Registra Uscita</button>
+                <hr style="margin:20px 0; border:0; border-top:1px solid var(--border);">
+                <select id="f-condo"><option value="">Scegli condomino...</option></select>
                 <select id="f-cau">
                     <option value="Rata Condominiale">Rata Condominiale</option>
                     <option value="Fondo Cassa">Fondo Cassa</option>
                 </select>
-                <input type="number" id="f-vimp" placeholder="Importo €">
-                <button class="btn btn-blue" style="background:var(--s);" onclick="salvaMovimento('ENTRATA')">Salva Entrata</button>
+                <input type="number" id="f-vimp" placeholder="Versamento €">
+                <button class="btn btn-blue" style="background:var(--success);" onclick="salvaMovimento('ENTRATA')">Registra Entrata</button>
             </div>
         </div>
 
         <div>
             <div class="panel">
-                <div class="panel-header" style="display:flex; justify-content:space-between;">SITUAZIONE ATTUALE <button onclick="stampaBilancio()" style="font-size:10px; cursor:pointer;">PDF</button></div>
-                <div style="overflow-x:auto;">
+                <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    Situazione Corrente
+                    <button class="btn btn-gray" style="width:auto; padding:4px 10px; font-size:10px;" onclick="stampaBilancio()">REPORT PDF</button>
+                </div>
+                <div style="overflow-x: auto;">
                     <table>
-                        <thead><tr><th>NOME</th><th>QUOTA</th><th>VERSATO</th><th>SALDO</th></tr></thead>
+                        <thead><tr><th>CONDOMINO</th><th>QUOTA</th><th>VERSATO</th><th>SALDO</th></tr></thead>
                         <tbody id="main-table-body"></tbody>
                     </table>
                 </div>
             </div>
 
+            <!-- REGISTRO DETTAGLIATO PER CANCELLAZIONI -->
             <div class="panel">
-                <div class="panel-header">REGISTRO ANALITICO (CANCELLAZIONE)</div>
-                <div style="max-height: 400px; overflow-y: auto;">
+                <div class="panel-header">Registro Movimenti (Ultimi Inserimenti)</div>
+                <div style="max-height: 300px; overflow-y: auto;">
                     <table>
-                        <thead><tr><th>DATA</th><th>DETTAGLIO</th><th>IMP.</th><th>AZIONE</th></tr></thead>
+                        <thead><tr><th>Data</th><th>Dettaglio</th><th>Importo</th><th></th></tr></thead>
                         <tbody id="reg-table-body"></tbody>
                     </table>
                 </div>
@@ -100,11 +107,12 @@
 
 <!-- MODALI -->
 <div id="modalEsercizio" class="modal"><div class="modal-content">
-    <h4>Gestione Anno</h4>
+    <h4>Esercizio</h4>
     <input type="number" id="input-edit-anno">
     <button class="btn btn-blue" onclick="aggiornaAnno()">Salva Anno</button>
-    <hr style="margin:20px 0;"><button class="btn btn-red" onclick="proceduraChiusura()">🔒 Archivia Bilancio</button>
-    <button class="btn btn-gray" style="margin-top:10px;" onclick="toggleModal('modalEsercizio')">Annulla</button>
+    <hr style="margin:20px 0;">
+    <button class="btn btn-red" onclick="proceduraChiusura()">🔒 Chiudi e Archivia</button>
+    <button class="btn btn-gray" style="margin-top:10px;" onclick="toggleModal('modalEsercizio')">Chiudi</button>
 </div></div>
 
 <div id="settingsModal" class="modal"><div class="modal-content">
@@ -114,13 +122,14 @@
     <button class="btn btn-gray" style="margin-top:15px;" onclick="toggleModal('settingsModal')">Chiudi</button>
 </div></div>
 
-<div id="archiveModal" class="modal"><div class="modal-content">
-    <h4>Archivio Storico</h4>
+<div id="archiveModal" class="modal"><div class="modal-content" style="max-width:500px;">
+    <h4>Storico</h4>
     <div id="lista-archivi"></div>
     <button class="btn btn-gray" style="margin-top:15px;" onclick="toggleModal('archiveModal')">Chiudi</button>
 </div></div>
 
 <script>
+    // CONFIGURAZIONE FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyBCHjSOjZmN6Fcj-Pju4AM5Yx2edIuDwJo",
       authDomain: "condomanager-86dac.firebaseapp.com",
@@ -144,13 +153,14 @@
     function renderUI() {
         document.getElementById('label-anno').innerText = "Esercizio " + state.anno;
         document.getElementById('input-edit-anno').value = state.anno;
+        
         const totS = state.spese.reduce((a,b) => a + Number(b.imp), 0);
         const totF = state.versamenti.filter(v => v.cau === "Fondo Cassa").reduce((a,b) => a + Number(b.imp), 0);
         const totV = state.versamenti.reduce((a,b) => a + Number(b.imp), 0);
 
-        document.getElementById('st-uscite').innerText = totS.toFixed(2) + " €";
-        document.getElementById('st-fondo').innerText = totF.toFixed(2) + " €";
-        document.getElementById('st-liquidita').innerText = (totV - totS).toFixed(2) + " €";
+        document.getElementById('st-uscite').innerText = totS.toLocaleString('it-IT', {style:'currency', currency:'EUR'});
+        document.getElementById('st-fondo').innerText = totF.toLocaleString('it-IT', {style:'currency', currency:'EUR'});
+        document.getElementById('st-liquidita').innerText = (totV - totS).toLocaleString('it-IT', {style:'currency', currency:'EUR'});
 
         document.getElementById('f-condo').innerHTML = '<option value="">Scegli...</option>' + 
             state.condomini.map((c, i) => `<option value="${i}">${c.nome}</option>`).join('');
@@ -162,56 +172,62 @@
             return `<tr><td><b>${c.nome}</b></td><td>${q.toFixed(2)}€</td><td>${v.toFixed(2)}€</td><td style="color:${v-q>=0?'green':'red'}"><b>${(v-q).toFixed(2)}€</b></td></tr>`;
         }).join('');
 
+        // RENDERING REGISTRO MOVIMENTI (CON CANCELLAZIONE)
         const regBody = document.getElementById('reg-table-body');
-        let html = "";
-        state.spese.forEach((s, idx) => {
-            html += `<tr><td>${s.data}</td><td>${s.desc}</td><td style="color:red">-${s.imp}€</td><td><span class="del-btn" onclick="cancellaVoce('SPESA', ${idx})">CANCELLA</span></td></tr>`;
-        });
-        state.versamenti.forEach((v, idx) => {
-            html += `<tr><td>${v.data}</td><td>${state.condomini[v.id]?.nome || 'Condomino'} (${v.cau})</td><td style="color:green">+${v.imp}€</td><td><span class="del-btn" onclick="cancellaVoce('VERS', ${idx})">CANCELLA</span></td></tr>`;
-        });
-        regBody.innerHTML = html;
+        let movs = [
+            ...state.spese.map((s, i) => ({...s, type: 'SPESA', idx: i})),
+            ...state.versamenti.map((v, i) => ({...v, type: 'VERS', idx: i}))
+        ].sort((a,b) => new Date(b.data) - new Date(a.data));
+
+        regBody.innerHTML = movs.map(m => `
+            <tr>
+                <td><small>${m.data}</small></td>
+                <td>${m.type === 'SPESA' ? m.desc : state.condomini[m.id]?.nome}</td>
+                <td style="color:${m.type==='SPESA'?'red':'green'}">${Number(m.imp).toFixed(2)}€</td>
+                <td><span class="del-x" onclick="eliminaDato('${m.type}', ${m.idx})">✕</span></td>
+            </tr>`).join('');
 
         document.getElementById('lista-condo').innerHTML = state.condomini.map((c, i) => `
             <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #eee;">
-                <span>${c.nome}</span> <span class="del-btn" onclick="cancellaVoce('CONDO', ${i})">X</span>
+                <span>${c.nome}</span> <span class="del-x" onclick="eliminaCondo(${i})">✕</span>
             </div>`).join('');
     }
 
     async function salvaMovimento(tipo) {
         if(tipo === 'USCITA') {
             const d = document.getElementById('f-desc').value, i = parseFloat(document.getElementById('f-imp').value), dt = document.getElementById('f-data').value;
-            if(!d || isNaN(i) || !dt) return alert("Compila tutti i campi");
+            if(!d || isNaN(i)) return;
             state.spese.push({ desc: d, imp: i, data: dt });
-            document.getElementById('f-desc').value = ""; document.getElementById('f-imp').value = "";
         } else {
             const id = document.getElementById('f-condo').value, i = parseFloat(document.getElementById('f-vimp').value), cau = document.getElementById('f-cau').value;
-            if(id === "" || isNaN(i)) return alert("Dati mancanti");
+            if(id === "" || isNaN(i)) return;
             state.versamenti.push({ id, imp: i, cau, data: new Date().toISOString().split('T')[0] });
-            document.getElementById('f-vimp').value = "";
         }
         await fs.collection("gestione").doc("corrente").set(state);
     }
 
-    async function cancellaVoce(tipo, idx) {
-        if(!confirm("Vuoi eliminare definitivamente questa voce?")) return;
+    async function eliminaDato(tipo, idx) {
+        if(!confirm("Cancellare definitivamente questo movimento?")) return;
         if(tipo === 'SPESA') state.spese.splice(idx, 1);
-        if(tipo === 'VERS') state.versamenti.splice(idx, 1);
-        if(tipo === 'CONDO') state.condomini.splice(idx, 1);
+        else state.versamenti.splice(idx, 1);
         await fs.collection("gestione").doc("corrente").set(state);
     }
 
-    async function cancellaArchivio(docId) {
-        if(!confirm("Cancellare definitivamente questo archivio?")) return;
+    async function eliminaArchivio(docId) {
+        if(!confirm("⚠️ ATTENZIONE: Cancellare definitivamente questo bilancio archiviato?")) return;
         await fs.collection("archivio").doc(docId).delete();
+        alert("Archivio rimosso.");
     }
 
     async function salvaCondomino() {
         const n = document.getElementById('c-nome').value, m = parseFloat(document.getElementById('c-mill').value);
-        if(!n || isNaN(m)) return alert("Dati mancanti");
+        if(!n || isNaN(m)) return;
         state.condomini.push({ nome: n, mill: m });
         await fs.collection("gestione").doc("corrente").set(state);
-        document.getElementById('c-nome').value = ""; document.getElementById('c-mill').value = "";
+    }
+
+    async function eliminaCondo(i) {
+        if(confirm("Eliminare condomino?")) { state.condomini.splice(i, 1); await fs.collection("gestione").doc("corrente").set(state); }
     }
 
     async function aggiornaAnno() {
@@ -221,8 +237,8 @@
     }
 
     async function proceduraChiusura() {
-        if(!confirm("Archiviare l'anno corrente?")) return;
-        await fs.collection("archivio").doc("anno_" + state.anno).set(state);
+        if(!confirm("Archiviare l'esercizio?")) return;
+        await fs.collection("archivio").doc("anno_" + state.anno).set({...state});
         const f = state.versamenti.filter(v => v.cau === "Fondo Cassa");
         state.anno++; state.spese = []; state.versamenti = f;
         await fs.collection("gestione").doc("corrente").set(state);
@@ -235,10 +251,10 @@
             div.innerHTML = snap.empty ? "Nessun archivio." : snap.docs.map(doc => {
                 const d = doc.data();
                 return `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; align-items:center;">
-                    <span><b>Anno ${d.anno}</b></span>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-gray" style="width:auto" onclick='generaPDFStorico(${JSON.stringify(d)})'>PDF</button>
-                        <button class="btn btn-red" style="width:auto; padding:5px 10px;" onclick="cancellaArchivio('${doc.id}')">ELIMINA</button>
+                    <span><b>Bilancio ${d.anno}</b></span>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick='generaPDFStorico(${JSON.stringify(d)})'>PDF</button>
+                        <button style="background:var(--danger); color:white; border:none; border-radius:4px; padding:4px 8px;" onclick="eliminaArchivio('${doc.id}')">Elimina</button>
                     </div>
                 </div>`;
             }).join('');
@@ -256,7 +272,7 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         doc.setFontSize(18); doc.text("BILANCIO ANNO " + data.anno, 14, 20);
-        doc.autoTable({ startY: 30, head: [['Data', 'Spesa', '€']], body: data.spese.map(s => [s.data, s.desc, s.imp.toFixed(2)]) });
+        doc.autoTable({ startY: 30, head: [['Data', 'Spesa', '€']], body: data.spese.map(s => [s.data, s.desc, Number(s.imp).toFixed(2)]) });
         const totS = data.spese.reduce((a,b) => a + Number(b.imp), 0);
         doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, head: [['Nome', 'Mill.', 'Quota', 'Saldo']], body: data.condomini.map((c, i) => {
             const q = (totS * c.mill)/1000;
