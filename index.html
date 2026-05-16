@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CondoManager Pro v6.3</title>
     
+    <!-- SDK di Firebase (Inclusa l'estensione per l'Authentication) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -71,58 +73,86 @@
         .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 18px; padding: 20px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
         .header-btns { display:flex; gap:6px; }
+
+        /* Schermata di Login */
+        #login-screen {
+            position: fixed; inset: 0; background: #0f172a; z-index: 9999;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .login-box {
+            background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center;
+        }
+
+        /* Nascondi l'applicazione prima del login */
+        #app-content { display: none; }
     </style>
 </head>
 <body>
 
-<header>
-    <div style="font-weight: 900; font-size: 14px; letter-spacing: -0.5px;">CONDOMANAGER PRO</div>
-    <div class="header-btns">
-        <button class="btn btn-gray" style="width:auto; background:#334155; color:white; border:none;" onclick="toggleModal('regModal')">MOV.</button>
-        <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('modalEsercizio')"><span id="header-anno">2024</span> ▾</button>
-        <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('archiveModal')">ARC.</button>
-        <button class="btn btn-gray" style="width:auto; padding:8px 10px;" onclick="toggleModal('settingsModal')">⚙️</button>
+<!-- SCHERMATA DI LOGIN -->
+<div id="login-screen">
+    <div class="login-box">
+        <h2 style="margin-top:0; color:#0f172a; letter-spacing:-0.5px;">CONDOMANAGER PRO</h2>
+        <p style="color:#64748b; margin-bottom:20px;">Inserisci le tue credenziali per accedere</p>
+        <input type="email" id="login-email" placeholder="Indirizzo Email">
+        <input type="password" id="login-password" placeholder="Password">
+        <button class="btn btn-blue" style="width: 100%;" onclick="accedi()">Accedi</button>
     </div>
-</header>
+</div>
 
-<div class="container">
-    <div class="summary-bar">
-        <div class="summary-card"><small>Uscite</small><b id="st-uscite">0,00 €</b></div>
-        <div class="summary-card"><small>Entrate</small><b id="st-entrate" style="color:var(--s)">0,00 €</b></div>
-        <div class="summary-card"><small>Fondo</small><b id="st-fondo" style="color:var(--a)">0,00 €</b></div>
-        <div class="summary-card"><small>Cassa</small><b id="st-liquidita">0,00 €</b></div>
-    </div>
+<!-- CONTENUTO DELL'APPLICAZIONE -->
+<div id="app-content">
+    <header>
+        <div style="font-weight: 900; font-size: 14px; letter-spacing: -0.5px;">CONDOMANAGER PRO</div>
+        <div class="header-btns">
+            <button class="btn btn-gray" style="width:auto; background:#334155; color:white; border:none;" onclick="toggleModal('regModal')">MOV.</button>
+            <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('modalEsercizio')"><span id="header-anno">2024</span> ▾</button>
+            <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('archiveModal')">ARC.</button>
+            <button class="btn btn-gray" style="width:auto; padding:8px 10px;" onclick="toggleModal('settingsModal')">⚙️</button>
+            <button class="btn btn-red" style="width:auto; padding:8px 10px; background:#475569;" onclick="disconnetti()">🚪</button>
+        </div>
+    </header>
 
-    <div class="main-grid">
-        <div class="panel">
-            <div class="panel-header">REGISTRAZIONE</div>
-            <div class="panel-body">
-                <label style="font-size:10px; font-weight:800; color:#64748b;">DATA (GG/MM/AAAA)</label>
-                <input type="text" id="f-data" inputmode="numeric">
-                <input type="text" id="f-desc" placeholder="Descrizione spesa">
-                <input type="number" id="f-imp" placeholder="Importo uscita €" inputmode="decimal">
-                <button class="btn btn-blue" style="width:100%" onclick="salvaMovimento('USCITA')">Registra Uscita</button>
-                <hr style="margin:15px 0; border:0; border-top:1px solid var(--b);">
-                <select id="f-condo"></select>
-                <select id="f-cau">
-                    <option value="Rata Condominiale">Rata Condominiale</option>
-                    <option value="Fondo Cassa">Fondo Cassa</option>
-                </select>
-                <input type="number" id="f-vimp" placeholder="Importo versato €" inputmode="decimal">
-                <button class="btn btn-blue" style="width:100%; background:var(--s);" onclick="salvaMovimento('ENTRATA')">Registra Entrata</button>
-            </div>
+    <div class="container">
+        <div class="summary-bar">
+            <div class="summary-card"><small>Uscite</small><b id="st-uscite">0,00 €</b></div>
+            <div class="summary-card"><small>Entrate</small><b id="st-entrate" style="color:var(--s)">0,00 €</b></div>
+            <div class="summary-card"><small>Fondo</small><b id="st-fondo" style="color:var(--a)">0,00 €</b></div>
+            <div class="summary-card"><small>Cassa</small><b id="st-liquidita">0,00 €</b></div>
         </div>
 
-        <div class="panel">
-            <div class="panel-header">
-                MILLESIMALE
-                <button class="btn btn-gray" style="width:auto; padding:4px 10px; font-size:10px;" onclick="stampaQuote()">ESPORTA QUOTE</button>
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-header">REGISTRAZIONE</div>
+                <div class="panel-body">
+                    <label style="font-size:10px; font-weight:800; color:#64748b;">DATA (GG/MM/AAAA)</label>
+                    <input type="text" id="f-data" inputmode="numeric">
+                    <input type="text" id="f-desc" placeholder="Descrizione spesa">
+                    <input type="number" id="f-imp" placeholder="Importo uscita €" inputmode="decimal">
+                    <button class="btn btn-blue" style="width:100%" onclick="salvaMovimento('USCITA')">Registra Uscita</button>
+                    <hr style="margin:15px 0; border:0; border-top:1px solid var(--b);">
+                    <select id="f-condo"></select>
+                    <select id="f-cau">
+                        <option value="Rata Condominiale">Rata Condominiale</option>
+                        <option value="Fondo Cassa">Fondo Cassa</option>
+                    </select>
+                    <input type="number" id="f-vimp" placeholder="Importo versato €" inputmode="decimal">
+                    <button class="btn btn-blue" style="width:100%; background:var(--s);" onclick="salvaMovimento('ENTRATA')">Registra Entrata</button>
+                </div>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>CONDOMINO</th><th>QUOTA</th><th>VERSATO</th><th>SALDO</th></tr></thead>
-                    <tbody id="main-table-body"></tbody>
-                </table>
+
+            <div class="panel">
+                <div class="panel-header">
+                    MILLESIMALE
+                    <button class="btn btn-gray" style="width:auto; padding:4px 10px; font-size:10px;" onclick="stampaQuote()">ESPORTA QUOTE</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>CONDOMINO</th><th>QUOTA</th><th>VERSATO</th><th>SALDO</th></tr></thead>
+                        <tbody id="main-table-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -157,7 +187,6 @@
 <div id="archiveModal" class="modal"><div class="modal-content"><div id="lista-archivi"></div><button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('archiveModal')">Chiudi</button></div></div>
 
 <script>
-    // Configurazione Firebase protetta con variabili d'ambiente leggibili da Vercel o Bundler
     const firebaseConfig = {
       apiKey: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_API_KEY : "AIzaSyBCHjSOjZmN6Fcj-Pju4AM5Yx2edIuDwJo",
       authDomain: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN : "condomanager-86dac.firebaseapp.com",
@@ -169,7 +198,43 @@
 
     firebase.initializeApp(firebaseConfig);
     const fs = firebase.firestore();
+    const auth = firebase.auth(); // Inizializza l'autenticazione
     let state = { anno: 2024, condomini: [], spese: [], versamenti: [] };
+
+    // --- FUNZIONI DI AUTENTICAZIONE ---
+    async function accedi() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        if(!email || !pass) return alert("Inserisci email e password");
+        
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+        } catch (error) {
+            alert("Errore di accesso: " + error.message);
+        }
+    }
+
+    async function disconnetti() {
+        if(confirm("Vuoi uscire dall'applicazione?")) {
+            await auth.signOut();
+            location.reload();
+        }
+    }
+
+    // Monitora lo stato dell'utente (Loggato / Non loggato)
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // Utente autenticato correttamente: mostra l'app e nascondi il login
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            initApp();
+        } else {
+            // Utente disconnesso: mostra la schermata di login
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-content').style.display = 'none';
+        }
+    });
+    // ----------------------------------
 
     function initApp() {
         fs.collection("gestione").doc("corrente").onSnapshot(doc => { if (doc.exists) { state = doc.data(); renderUI(); } });
@@ -257,7 +322,8 @@
     function loadArchivio() { fs.collection("archivio").onSnapshot(snap => { document.getElementById('lista-archivi').innerHTML = snap.docs.map(doc => `<div style="padding:10px; border-bottom:1px solid #eee;">Anno ${doc.data().anno} <button class="btn btn-gray" style="float:right; padding:4px 8px;" onclick='generaBilancioCompleto(${JSON.stringify(doc.data())})'>PDF</button></div>`).join(''); }); }
     
     document.getElementById('f-data').value = new Date().toLocaleDateString('it-IT');
-    initApp();
+    
+    // Rimosso initApp() diretto: viene chiamato automaticamente dall'ascoltatore auth.onAuthStateChanged se l'utente è loggato.
 </script>
 </body>
 </html>
