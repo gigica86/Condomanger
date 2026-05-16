@@ -157,13 +157,14 @@
 <div id="archiveModal" class="modal"><div class="modal-content"><div id="lista-archivi"></div><button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('archiveModal')">Chiudi</button></div></div>
 
 <script>
+    // Configurazione Firebase protetta con variabili d'ambiente leggibili da Vercel o Bundler
     const firebaseConfig = {
-      apiKey: "AIzaSyBCHjSOjZmN6Fcj-Pju4AM5Yx2edIuDwJo",
-      authDomain: "condomanager-86dac.firebaseapp.com",
-      projectId: "condomanager-86dac",
-      storageBucket: "condomanager-86dac.firebasestorage.app",
-      messagingSenderId: "582217098715",
-      appId: "1:582217098715:web:c18804916c776cb48e73fe"
+      apiKey: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_API_KEY : "AIzaSyBCHjSOjZmN6Fcj-Pju4AM5Yx2edIuDwJo",
+      authDomain: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN : "condomanager-86dac.firebaseapp.com",
+      projectId: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID : "condomanager-86dac",
+      storageBucket: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET : "condomanager-86dac.firebasestorage.app",
+      messagingSenderId: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID : "582217098715",
+      appId: typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_FIREBASE_APP_ID : "1:582217098715:web:c18804916c776cb48e73fe"
     };
 
     firebase.initializeApp(firebaseConfig);
