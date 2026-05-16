@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CondoManager Elite v4.4</title>
+    <title>CondoManager Elite Cloud</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         :root { 
             --bg: #f1f5f9; --card: #ffffff; --text: #1e293b;
@@ -15,150 +18,232 @@
             --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
             --shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); margin: 0; color: var(--text); line-height: 1.5; }
-        header { background: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 1000; }
-        .brand { font-weight: 800; font-size: 1.4rem; color: var(--primary); letter-spacing: -0.025em; }
-        .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
-        .card { background: var(--card); padding: 24px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 24px; border: 1px solid #e2e8f0; }
-        h4 { margin: 0 0 20px 0; font-size: 0.9rem; text-transform: uppercase; color: var(--secondary); letter-spacing: 0.1em; font-weight: 700; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; }
-        input, select { width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 10px; margin-bottom: 16px; box-sizing: border-box; font-size: 1rem; background: #fff; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th { text-align: left; padding: 14px; color: var(--secondary); border-bottom: 2px solid #f1f5f9; background: #f8fafc; }
-        td { padding: 14px; border-bottom: 1px solid #f1f5f9; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
-        .modal { display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); overflow-y: auto; }
-        .action-btn { cursor: pointer; border: none; background: #f1f5f9; padding: 8px; border-radius: 8px; color: var(--secondary); }
-        .badge-anno { background: #1e293b; color: white; padding: 8px 16px; border-radius: 12px; font-weight: 700; }
-        .stats-box { background: #eff6ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 12px; text-align: center; }
-        .stats-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+        
+        /* HEADER RESPONSIVE */
+        header { 
+            background: #fff; padding: 12px 20px; 
+            display: flex; flex-direction: column; gap: 10px;
+            border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 1000; 
+        }
+        @media (min-width: 768px) {
+            header { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
+        .brand { font-weight: 800; font-size: 1.2rem; color: var(--primary); letter-spacing: -0.025em; }
+        .nav-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+        .container { max-width: 1200px; margin: 15px auto; padding: 0 15px; }
+        
+        .card { background: var(--card); padding: 20px; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        
+        h4 { margin: 0 0 15px 0; font-size: 0.85rem; text-transform: uppercase; color: var(--secondary); letter-spacing: 0.1em; }
+
+        /* BUTTONS & INPUTS */
+        .btn-main, .btn-outline { 
+            padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; 
+            transition: transform 0.1s, opacity 0.2s; font-size: 0.9rem; border: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-main:active { transform: scale(0.97); }
+
+        input, select { 
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; 
+            margin-bottom: 12px; box-sizing: border-box; font-size: 16px; /* 16px previene lo zoom automatico su iPhone */
+        }
+
+        /* GRID RESPONSIVA */
+        .grid-3 { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; } }
+
+        /* TABELLE SCROLLABILI SU MOBILE */
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 500px; }
+        th { text-align: left; padding: 12px; background: #f8fafc; color: var(--secondary); border-bottom: 2px solid #f1f5f9; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+
+        .stats-box { background: #eff6ff; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #bfdbfe; }
+        .stats-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+
+        /* MODALI */
+        .modal { display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); }
+        .modal-content { 
+            background: white; margin: 5% auto; padding: 20px; border-radius: 20px; 
+            width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; 
+        }
+        
+        .badge-anno { background: #1e293b; color: white; padding: 6px 12px; border-radius: 10px; font-weight: 700; }
+        
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+        }
     </style>
 </head>
 <body>
 
+<div id="loading-overlay">
+    <div class="brand">🏢 CondoManager Elite</div>
+    <p>Sincronizzazione Cloud...</p>
+</div>
+
 <header>
     <div class="brand">🏢 CondoManager Elite</div>
-    <div style="display:flex; align-items:center; gap:12px;">
-        <button class="btn-outline" onclick="toggleModal('fullRegModal')">🔍 Registro Unificato</button>
-        <button class="btn-outline" onclick="generaProspettoQuote()">📤 Invia Quote</button>
+    <div class="nav-actions">
+        <button class="btn-outline" onclick="toggleModal('fullRegModal')">🔍 Registro</button>
         <button class="btn-main" onclick="generaBilancioPDFCompleto(db)">📄 Consuntivo</button>
         <div class="badge-anno" id="header-anno">2024</div>
-        <button class="action-btn" onclick="toggleDropdown()">⚙️</button>
-        <div id="settingsMenu" style="display:none; position:absolute; right:20px; top:70px; background:#fff; border-radius:12px; box-shadow:var(--shadow); width:220px; border:1px solid #e2e8f0; z-index:1001;">
-            <button style="width:100%; padding:12px; border:none; background:none; text-align:left; cursor:pointer;" onclick="toggleModal('settingsModal')">👥 Condomini</button>
-            <button style="width:100%; padding:12px; border:none; background:none; text-align:left; cursor:pointer;" onclick="toggleModal('archiveModal')">📜 Archivio Storico</button>
-            <button style="width:100%; padding:12px; border:none; background:none; text-align:left; cursor:pointer;" onclick="exportBackup()">💾 Backup</button>
-            <button style="width:100%; padding:12px; border:none; background:none; text-align:left; cursor:pointer;" onclick="document.getElementById('importFile').click()">📂 Importa</button>
-        </div>
+        <button class="btn-outline" onclick="toggleDropdown()">⚙️</button>
     </div>
 </header>
 
-<input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
+<div id="settingsMenu" style="display:none; position:absolute; right:20px; top:110px; background:#fff; border-radius:12px; box-shadow:var(--shadow); width:200px; border:1px solid #e2e8f0; z-index:1001;">
+    <button style="width:100%; padding:12px; border:none; border-bottom:1px solid #eee; text-align:left;" onclick="toggleModal('settingsModal')">👥 Condomini</button>
+    <button style="width:100%; padding:12px; border:none; text-align:left;" onclick="exportBackup()">💾 Backup JSON</button>
+</div>
 
 <div class="container">
-    <div class="grid-3" style="margin-bottom: 24px;">
-        <div class="stats-box"><small>USCITE ESERCIZIO</small><div id="val-tot-riparto-header" class="stats-val">0.00 €</div></div>
-        <div class="stats-box" style="background: #ecfdf5; border-color: #a7f3d0;"><small style="color: #065f46;">FONDO CASSA TOTALE</small><div id="val-fondo-auto-header" class="stats-val" style="color: #059669;">0.00 €</div></div>
-        <div class="stats-box" style="background: #fffbeb; border-color: #fde68a;"><small style="color: #92400e;">LIQUIDITÀ ATTUALE</small><div id="val-liquidita" class="stats-val" style="color: #d97706;">0.00 €</div></div>
+    <div class="grid-3" style="margin-bottom: 20px;">
+        <div class="stats-box"><small>USCITE</small><div id="val-tot-riparto-header" class="stats-val">0.00 €</div></div>
+        <div class="stats-box" style="background: #ecfdf5;"><small>FONDO</small><div id="val-fondo-auto-header" class="stats-val" style="color: #059669;">0.00 €</div></div>
+        <div class="stats-box" style="background: #fffbeb;"><small>CASSA</small><div id="val-liquidita" class="stats-val" style="color: #d97706;">0.00 €</div></div>
     </div>
 
     <div class="grid-3">
         <div class="card">
-            <h4>💸 Uscita Spesa</h4>
+            <h4>💸 Nuova Uscita</h4>
             <input type="date" id="s-data">
-            <input type="text" id="s-desc" placeholder="Descrizione uscita">
-            <input type="number" id="s-imp" placeholder="Importo €" step="0.01">
-            <button class="btn-main" style="width:100%" onclick="addSpesa()">Registra Spesa</button>
+            <input type="text" id="s-desc" placeholder="Descrizione spesa">
+            <input type="number" id="s-imp" placeholder="Importo €" inputmode="decimal">
+            <button class="btn-main" style="width:100%" onclick="addSpesa()">Registra</button>
         </div>
         <div class="card">
-            <h4>💰 Entrata Rata</h4>
-            <select id="v-condomino"><option value="">Seleziona...</option></select>
-            <select id="v-causale"><option value="Rata Condominiale">Rata Condominiale</option><option value="Fondo Cassa">Fondo Cassa</option></select>
-            <input type="number" id="v-imp" placeholder="Importo €" step="0.01">
-            <button class="btn-main" style="width:100%; background:var(--warning)" onclick="addVersamento()">Registra Entrata</button>
+            <h4>💰 Nuova Entrata</h4>
+            <select id="v-condomino"></select>
+            <select id="v-causale">
+                <option value="Rata Condominiale">Rata Condominiale</option>
+                <option value="Fondo Cassa">Fondo Cassa</option>
+            </select>
+            <input type="number" id="v-imp" placeholder="Importo €" inputmode="decimal">
+            <button class="btn-main" style="width:100%; background:var(--warning)" onclick="addVersamento()">Registra</button>
         </div>
         <div class="card">
-            <h4>📅 Gestione Anno</h4>
-            <input type="number" id="input-anno" value="2024" onchange="cambiaAnno()">
-            <button class="btn-main" style="width:100%; background:var(--success)" onclick="chiudiEsercizio()">💾 Archivia Esercizio</button>
+            <h4>📅 Esercizio</h4>
+            <input type="number" id="input-anno" value="2024">
+            <button class="btn-main" style="width:100%; background:var(--success)" onclick="chiudiEsercizio()">Archivia Anno</button>
         </div>
     </div>
 
     <div class="card">
-        <h4>🏦 Situazione Millesimale Esercizio Corrente</h4>
-        <div style="overflow-x:auto"><table><thead><tr><th>Condomino</th><th>Mill.</th><th>Quota Spesa</th><th>Versato Rate</th><th style="color:var(--success)">Fondo Personale</th><th>Saldo Rata</th></tr></thead><tbody id="tab-main"></tbody></table></div>
+        <h4>🏦 Situazione Millesimale</h4>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>Condomino</th><th>Mill.</th><th>Quota</th><th>Versato</th><th>Fondo</th><th>Saldo</th></tr>
+                </thead>
+                <tbody id="tab-main"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div id="fullRegModal" class="modal">
-    <div class="card" style="max-width:1000px; margin: 40px auto; min-height: 85vh; display:flex; flex-direction:column;">
-        <h3>🔍 Registro Unificato (Entrate / Uscite)</h3>
-        
-        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:20px;">
-            <div>
-                <label style="font-size:0.8rem; font-weight:bold;">Anno:</label>
-                <select id="reg-filter-anno" onchange="renderFullRegistry()"><option value="TUTTI">Tutti gli Anni</option></select>
-            </div>
-            <div>
-                <label style="font-size:0.8rem; font-weight:bold;">Tipologia:</label>
-                <select id="reg-filter-tipo" onchange="renderFullRegistry()"><option value="TUTTI">Tutti i movimenti</option><option value="ENTRATA">Solo Entrate</option><option value="USCITA">Solo Uscite</option></select>
-            </div>
-            <div style="display:flex; align-items:flex-end;">
-                <button class="btn-outline" style="width:100%;" onclick="resetRegistryFilters()">Azzera Filtri</button>
-            </div>
-        </div>
-
-        <div style="flex-grow:1; overflow-y:auto; border:1px solid #e2e8f0; border-radius:12px;">
-            <table>
-                <thead><tr><th>Data</th><th>Esercizio</th><th>Tipo</th><th>Dettaglio/Causale</th><th>Importo</th><th>Azioni</th></tr></thead>
+    <div class="modal-content">
+        <h3>🔍 Registro Unificato</h3>
+        <div class="table-wrapper">
+            <table id="full-registry-table">
+                <thead><tr><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Euro</th><th>Azione</th></tr></thead>
                 <tbody id="full-registry-body"></tbody>
             </table>
         </div>
-        <button class="btn-main" style="margin-top:20px; background:var(--secondary)" onclick="toggleModal('fullRegModal')">Chiudi</button>
-    </div>
-</div>
-
-<div id="archiveModal" class="modal">
-    <div class="card" style="max-width:550px; margin: 40px auto;">
-        <h3>📜 Archivio Storico Esercizi Chiusi</h3>
-        <div id="archiveList"></div>
-        <button class="btn-main" style="background:var(--secondary); margin-top:20px; width:100%" onclick="toggleModal('archiveModal')">Chiudi</button>
+        <button class="btn-main" style="margin-top:20px; background:var(--secondary); width:100%" onclick="toggleModal('fullRegModal')">Chiudi</button>
     </div>
 </div>
 
 <div id="settingsModal" class="modal">
-    <div class="card" style="max-width:400px; margin: 40px auto;">
-        <h3>👥 Gestione Elenco Condomini</h3>
-        <input type="text" id="c-nome" placeholder="Nome Condomino"><input type="number" id="c-mill" placeholder="Millesimi"><button class="btn-main" style="width:100%" onclick="addCondomino()">Aggiungi</button>
-        <div style="margin-top:15px; max-height:200px; overflow-y:auto;"><table id="tab-nomi"></table></div>
+    <div class="modal-content" style="max-width:400px">
+        <h3>👥 Gestione Condomini</h3>
+        <input type="text" id="c-nome" placeholder="Nome">
+        <input type="number" id="c-mill" placeholder="Millesimi">
+        <button class="btn-main" style="width:100%" onclick="addCondomino()">Aggiungi</button>
+        <div class="table-wrapper" style="margin-top:15px; max-height:200px">
+            <table id="tab-nomi"></table>
+        </div>
         <button class="btn-main" style="background:var(--secondary); margin-top:15px; width:100%" onclick="toggleModal('settingsModal')">Chiudi</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('condoElite_v44')) || { anno: 2024, condomini: [], spese: [], versamenti: [], archivio: [] };
+    // --- CONFIGURAZIONE FIREBASE ---
+    // Sostituisci questi dati con quelli della tua console Firebase
+    const firebaseConfig = {
+        apiKey: "IL_TUO_API_KEY",
+        authDomain: "TUO_PROGETTO.firebaseapp.com",
+        databaseURL: "https://TUO_PROGETTO.europe-west1.firebasedatabase.app",
+        projectId: "TUO_PROGETTO",
+        storageBucket: "TUO_PROGETTO.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
 
-    document.getElementById('s-data').valueAsDate = new Date();
+    // Inizializza Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const dbRef = database.ref('condo_data');
 
-    function toggleDropdown() { const m = document.getElementById('settingsMenu'); m.style.display = (m.style.display === 'block') ? 'none' : 'block'; }
-    function toggleModal(id) { 
-        document.getElementById(id).style.display = (document.getElementById(id).style.display === 'block') ? 'none' : 'block'; 
-        if(id === 'fullRegModal') { updateRegistryYearFilter(); renderFullRegistry(); } 
-        updateUI(); 
+    // Variabile Database Locale
+    let db = { anno: 2024, condomini: [], spese: [], versamenti: [], archivio: [] };
+
+    // --- LOGICA SINCRONIZZAZIONE ---
+    // Scarica i dati dal Cloud all'avvio e ad ogni modifica esterna
+    dbRef.on('value', (snapshot) => {
+        const cloudData = snapshot.val();
+        if (cloudData) {
+            db = cloudData;
+        }
+        document.getElementById('loading-overlay').style.display = 'none';
+        updateUI();
+    });
+
+    function save() {
+        // Salva su Firebase (Cloud)
+        dbRef.set(db).catch(err => alert("Errore sincronizzazione: " + err));
     }
-    function cambiaAnno() { db.anno = parseInt(document.getElementById('input-anno').value); save(); }
+
+    // --- FUNZIONI APP ---
+    function toggleDropdown() { 
+        const m = document.getElementById('settingsMenu'); 
+        m.style.display = (m.style.display === 'block') ? 'none' : 'block'; 
+    }
+
+    function toggleModal(id) {
+        const m = document.getElementById(id);
+        m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+        if(id === 'fullRegModal') renderFullRegistry();
+    }
 
     function addCondomino() {
         const n = document.getElementById('c-nome'); const m = document.getElementById('c-mill');
-        if(n.value && m.value) { db.condomini.push({ nome: n.value.trim(), mill: parseFloat(m.value) }); n.value = ""; m.value = ""; save(); }
+        if(n.value && m.value) {
+            db.condomini.push({ nome: n.value.trim(), mill: parseFloat(m.value) });
+            n.value = ""; m.value = ""; save();
+        }
     }
 
     function addSpesa() {
         const d = document.getElementById('s-desc'); const i = document.getElementById('s-imp'); const dt = document.getElementById('s-data');
         if(d.value && i.value > 0) {
-            db.spese.push({ desc: d.value.toUpperCase(), imp: parseFloat(i.value), data: new Date(dt.value).toLocaleDateString(), rawDate: dt.value, annoRiferimento: parseInt(db.anno) });
+            db.spese.push({ 
+                desc: d.value.toUpperCase(), 
+                imp: parseFloat(i.value), 
+                data: new Date(dt.value).toLocaleDateString(), 
+                rawDate: dt.value, 
+                annoRiferimento: db.anno 
+            });
             d.value = ""; i.value = ""; save();
         }
     }
@@ -166,61 +251,30 @@
     function addVersamento() {
         const id = document.getElementById('v-condomino'); const cau = document.getElementById('v-causale'); const imp = document.getElementById('v-imp');
         if(id.value !== "" && imp.value > 0) {
-            db.versamenti.push({ condominoId: parseInt(id.value), nome: db.condomini[id.value].nome, imp: parseFloat(imp.value), causale: cau.value, data: new Date().toLocaleDateString(), rawDate: new Date().toISOString().split('T')[0], annoRiferimento: parseInt(db.anno) });
+            db.versamenti.push({ 
+                condominoId: id.value, 
+                nome: db.condomini[id.value].nome, 
+                imp: parseFloat(imp.value), 
+                causale: cau.value, 
+                data: new Date().toLocaleDateString(), 
+                rawDate: new Date().toISOString().split('T')[0], 
+                annoRiferimento: db.anno 
+            });
             imp.value = ""; save();
         }
     }
 
-    // FIX COMPLETO CHIUSURA: Forza l'assegnazione e pulisce i registri correnti
-    function chiudiEsercizio() {
-        if(!confirm(`Confermi la chiusura e l'archiviazione dell'anno ${db.anno}?`)) return;
-        
-        // Assegna l'anno corrente a tutto ciò che non lo ha prima di salvare lo snapshot
-        db.spese.forEach(s => s.annoRiferimento = parseInt(db.anno));
-        db.versamenti.forEach(v => v.annoRiferimento = parseInt(db.anno));
-
-        // Crea lo snapshot definitivo
-        const snapshotDaSalvare = JSON.parse(JSON.stringify({
-            anno: db.anno,
-            condomini: db.condomini,
-            spese: db.spese,
-            versamenti: db.versamenti
-        }));
-
-        db.archivio.push({
-            anno: db.anno,
-            dataChiusura: new Date().toLocaleString(),
-            snapshot: snapshotDaSalvare
-        });
-
-        // Genera immediatamente il PDF di fine anno per sicurezza
-        generaBilancioPDFCompleto(snapshotDaSalvare);
-
-        // RESET COMPLETO: Rimuove spese e azzera rate correnti. Il fondo cassa rimane.
-        db.spese = [];
-        db.versamenti = db.versamenti.filter(v => v.causale === "Fondo Cassa");
-        
-        // Incrementa e aggiorna gli input
-        db.anno = parseInt(db.anno) + 1;
-        
-        save();
-        alert("Esercizio archiviato con successo! Avviato il nuovo anno gestionale.");
-    }
-
-    function save() { localStorage.setItem('condoElite_v44', JSON.stringify(db)); updateUI(); }
-
     function updateUI() {
         document.getElementById('header-anno').innerText = db.anno;
-        document.getElementById('input-anno').value = db.anno;
-        const totS = db.spese.reduce((a, b) => a + b.imp, 0);
-        const totF = db.versamenti.filter(v => v.causale === "Fondo Cassa").reduce((a, b) => a + b.imp, 0);
-        const totV = db.versamenti.reduce((a, b) => a + b.imp, 0);
+        const totS = db.spese.reduce((a, b) => a + (b.imp || 0), 0);
+        const totF = db.versamenti.filter(v => v.causale === "Fondo Cassa").reduce((a, b) => a + (b.imp || 0), 0);
+        const totV = db.versamenti.reduce((a, b) => a + (b.imp || 0), 0);
         
         document.getElementById('val-tot-riparto-header').innerText = totS.toFixed(2) + " €";
         document.getElementById('val-fondo-auto-header').innerText = totF.toFixed(2) + " €";
         document.getElementById('val-liquidita').innerText = (totV - totS).toFixed(2) + " €";
 
-        document.getElementById('v-condomino').innerHTML = '<option value="">Seleziona...</option>' + 
+        document.getElementById('v-condomino').innerHTML = '<option value="">Seleziona Condomino...</option>' + 
             db.condomini.map((c, i) => `<option value="${i}">${c.nome}</option>`).join('');
 
         document.getElementById('tab-main').innerHTML = db.condomini.map((c, idx) => {
@@ -231,113 +285,42 @@
         }).join('');
 
         document.getElementById('tab-nomi').innerHTML = db.condomini.map((c, i) => `<tr><td>${c.nome}</td><td><button onclick="elimina('condomini',${i})">🗑️</button></td></tr>`).join('');
-        
-        const arc = document.getElementById('archiveList');
-        if(arc) arc.innerHTML = db.archivio.map((a, i) => `
-            <div style="background:#f8fafc; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                <div><b>ANNO GESTIONALE ${a.anno}</b><br><small>Chiuso il: ${a.dataChiusura}</small></div>
-                <div>
-                    <button class="btn-main" style="padding:6px 12px; font-size:0.75rem;" onclick="generaBilancioPDFCompleto(db.archivio[${i}].snapshot)">📄 PDF</button>
-                    <button onclick="elimina('archivio',${i})" style="color:red; background:none; border:none; cursor:pointer; margin-left:12px;">🗑️</button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function updateRegistryYearFilter() {
-        const select = document.getElementById('reg-filter-anno');
-        let anni = new Set([db.anno]);
-        db.spese.forEach(s => { if(s.annoRiferimento) anni.add(s.annoRiferimento) });
-        db.versamenti.forEach(v => { if(v.annoRiferimento) anni.add(v.annoRiferimento) });
-        db.archivio.forEach(a => anni.add(a.anno));
-        
-        let options = '<option value="TUTTI">Tutti gli Anni</option>';
-        Array.from(anni).sort().reverse().forEach(anno => { options += `<option value="${anno}">${anno}</option>`; });
-        select.innerHTML = options;
     }
 
     function renderFullRegistry() {
-        const fAnno = document.getElementById('reg-filter-anno').value;
-        const fTipo = document.getElementById('reg-filter-tipo').value;
         const body = document.getElementById('full-registry-body');
         body.innerHTML = "";
-
         let mov = [];
-
-        // Elementi correnti
-        db.spese.forEach((s, idx) => mov.push({ ...s, tipoDB: 'spese', origIdx: idx, displayTipo: 'USCITA', displayDesc: s.desc, anno: s.annoRiferimento || db.anno }));
-        db.versamenti.forEach((v, idx) => mov.push({ ...v, tipoDB: 'versamenti', origIdx: idx, displayTipo: 'ENTRATA', displayDesc: `${v.nome} (${v.causale})`, anno: v.annoRiferimento || db.anno }));
-
-        // Elementi archiviati
-        db.archivio.forEach((a) => {
-            a.snapshot.spese.forEach((s) => mov.push({ ...s, isArchived: true, displayTipo: 'USCITA', displayDesc: s.desc, anno: a.anno }));
-            a.snapshot.versamenti.forEach((v) => mov.push({ ...v, isArchived: true, displayTipo: 'ENTRATA', displayDesc: `${v.nome} (${v.causale})`, anno: a.anno }));
-        });
-
-        // Filtri
-        if(fAnno !== 'TUTTI') mov = mov.filter(m => m.anno.toString() === fAnno);
-        if(fTipo !== 'TUTTI') mov = mov.filter(m => m.displayTipo === fTipo);
-
-        mov.sort((a,b) => new Date(b.rawDate || 0) - new Date(a.rawDate || 0));
-
+        db.spese.forEach((s, i) => mov.push({...s, type: 'USCITA', tKey: 'spese', idx: i}));
+        db.versamenti.forEach((v, i) => mov.push({...v, type: 'ENTRATA', desc: `${v.nome} (${v.causale})`, tKey: 'versamenti', idx: i}));
+        
+        mov.sort((a,b) => new Date(b.rawDate) - new Date(a.rawDate));
         mov.forEach(m => {
-            body.innerHTML += `
-                <tr>
-                    <td>${m.data}</td>
-                    <td><b>${m.anno}</b></td>
-                    <td style="color:${m.displayTipo === 'ENTRATA' ? 'green' : 'red'}"><b>${m.displayTipo}</b></td>
-                    <td>${m.displayDesc}</td>
-                    <td><b>${m.imp.toFixed(2)}€</b></td>
-                    <td>
-                        ${!m.isArchived ? `<button class="action-btn" style="color:var(--danger)" onclick="elimina('${m.tipoDB}',${m.origIdx})">🗑️</button>` : ''}
-                        ${m.displayTipo === 'ENTRATA' ? `<button class="action-btn" onclick='stampaRicevutaDiretta(${JSON.stringify(m)})'>🖨️</button>` : ''}
-                    </td>
-                </tr>`;
+            body.innerHTML += `<tr>
+                <td><small>${m.data}</small></td>
+                <td style="color:${m.type === 'ENTRATA' ? 'green' : 'red'}"><b>${m.type}</b></td>
+                <td>${m.desc}</td>
+                <td>${m.imp.toFixed(2)}€</td>
+                <td><button onclick="elimina('${m.tKey}',${m.idx})">🗑️</button></td>
+            </tr>`;
         });
     }
 
-    function resetRegistryFilters() { document.getElementById('reg-filter-anno').value = 'TUTTI'; document.getElementById('reg-filter-tipo').value = 'TUTTI'; renderFullRegistry(); }
-    function elimina(t, i) { if(confirm("Eliminarlo definitivamente?")) { db[t].splice(i, 1); save(); if(t !== 'archivio') renderFullRegistry(); } }
-
-    function stampaRicevutaDiretta(v) {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit: 'mm', format: [105, 148] });
-        doc.setFont("helvetica", "bold"); doc.text("RICEVUTA DI VERSAMENTO", 15, 20);
-        doc.setFontSize(10); doc.setFont("helvetica", "normal");
-        doc.text(`Data: ${v.data}\nCondomino: ${v.nome}\nCausale: ${v.causale}`, 15, 35);
-        doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text(`Importo: ${v.imp.toFixed(2)} €`, 15, 65);
-        doc.save(`Ricevuta_${v.nome}_${v.data}.pdf`);
-    }
-
-    function generaProspettoQuote() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        const totS = db.spese.reduce((a, b) => a + b.imp, 0);
-        const totF = db.versamenti.filter(v => v.causale === "Fondo Cassa").reduce((a, b) => a + b.imp, 0);
-        doc.setFontSize(18); doc.setTextColor(37, 99, 235); doc.text(`PROSPETTO QUOTE - ANNO ${db.anno}`, 14, 20);
-        doc.setFontSize(12); doc.setTextColor(16, 185, 129); doc.text(`FONDO CASSA DISPONIBILE: ${totF.toFixed(2)} €`, 14, 30);
-        doc.autoTable({ startY: 45, head: [['Data', 'Descrizione', 'Importo (€)']], body: db.spese.map(s => [s.data, s.desc, s.imp.toFixed(2)]), headStyles: { fillColor: [100, 116, 139] } });
-        doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, head: [['Condomino', 'Mill.', 'Quota (€)']], body: db.condomini.map(c => [c.nome, c.mill, ((totS * c.mill)/1000).toFixed(2)]), headStyles: { fillColor: [37, 99, 235] } });
-        doc.save(`Quote_${db.anno}.pdf`);
-    }
+    function elimina(t, i) { if(confirm("Eliminare voce?")) { db[t].splice(i, 1); save(); } }
 
     function generaBilancioPDFCompleto(data) {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const totS = data.spese.reduce((a, b) => a + b.imp, 0);
-        const totF = data.versamenti.filter(v => v.causale === "Fondo Cassa").reduce((a, b) => a + b.imp, 0);
-        doc.setFontSize(18); doc.text(`BILANCIO CONSUNTIVO ${data.anno}`, 14, 20);
-        doc.setFontSize(11); doc.text(`Uscite totali: ${totS.toFixed(2)} € | Fondo Cassa totale accantonato: ${totF.toFixed(2)} €`, 14, 28);
-        doc.autoTable({ startY: 35, head: [['Condomino', 'Mill.', 'Quota', 'Versato', 'Fondo', 'Saldo']], body: data.condomini.map((c, i) => {
+        doc.setFontSize(18); doc.text(`BILANCIO ${data.anno}`, 14, 20);
+        doc.autoTable({ startY: 30, head: [['Condomino', 'Mill.', 'Quota', 'Versato', 'Saldo']], body: data.condomini.map((c, i) => {
             const q = (totS * c.mill)/1000;
             const vR = data.versamenti.filter(x => parseInt(x.condominoId) === i && x.causale === "Rata Condominiale").reduce((a,b)=>a+b.imp,0);
-            const vF = data.versamenti.filter(x => parseInt(x.condominoId) === i && x.causale === "Fondo Cassa").reduce((a,b)=>a+b.imp,0);
-            return [c.nome, c.mill, q.toFixed(2), vR.toFixed(2), vF.toFixed(2), (vR-q).toFixed(2)];
-        }), headStyles: { fillColor: [37, 99, 235] } });
-        doc.autoTable({ startY: doc.lastAutoTable.finalY + 15, head: [['Data', 'Descrizione', 'Importo']], body: data.spese.map(s => [s.data, s.desc, s.imp.toFixed(2) + ' €']), headStyles: { fillColor: [100, 116, 139] } });
-        doc.save(`Bilancio_Consuntivo_${data.anno}.pdf`);
+            return [c.nome, c.mill, q.toFixed(2), vR.toFixed(2), (vR-q).toFixed(2)];
+        })});
+        doc.save(`Bilancio_${data.anno}.pdf`);
     }
 
-    function exportBackup() { const b = new Blob([JSON.stringify(db)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `backup_condo.json`; a.click(); }
-    function importBackup(e) { const r = new FileReader(); r.onload = (ex) => { db = JSON.parse(ex.target.result); save(); }; r.readAsText(e.target.files[0]); }
-    updateUI();
+    document.getElementById('s-data').valueAsDate = new Date();
 </script>
 </body>
 </html>
