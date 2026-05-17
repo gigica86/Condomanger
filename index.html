@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CondoManager Pro v6.4</title>
+    <title>CondoManager Pro v6.5</title>
     
-    <!-- SDK di Firebase (Inclusa l'estensione per l'Authentication) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -90,7 +89,6 @@
 </head>
 <body>
 
-<!-- SCHERMATA DI LOGIN -->
 <div id="login-screen">
     <div class="login-box">
         <h2 style="margin-top:0; color:#0f172a; letter-spacing:-0.5px;">CONDOMANAGER PRO</h2>
@@ -101,16 +99,14 @@
     </div>
 </div>
 
-<!-- CONTENUTO DELL'APPLICAZIONE -->
 <div id="app-content">
     <header>
         <div style="font-weight: 900; font-size: 14px; letter-spacing: -0.5px;">CONDOMANAGER PRO</div>
         <div class="header-btns">
-            <button class="btn btn-gray" style="width:auto; background:#334155; color:white; border:none;" onclick="toggleModal('regModal')">MOV.</button>
-            <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('modalEsercizio')"><span id="header-anno">2024</span> ▾</button>
-            <button class="btn btn-gray" style="width:auto;" onclick="toggleModal('archiveModal')">ARC.</button>
-            <button class="btn btn-gray" style="width:auto; padding:8px 10px;" onclick="toggleModal('settingsModal')">⚙️</button>
-            <button class="btn btn-red" style="width:auto; padding:8px 10px; background:#475569;" onclick="disconnetti()">🚪</button>
+            <button class="btn btn-gray" style="width:auto; background:#334155; color:white; border:none; padding:8px 10px;" onclick="toggleModal('regModal')" title="Movimenti">📊</button>
+            <button class="btn btn-gray" style="width:auto; padding:8px 10px;" onclick="toggleModal('modalEsercizio')"><span id="header-anno">2024</span> ▾</button>
+            <button class="btn btn-gray" style="width:auto; padding:8px 10px;" onclick="toggleModal('archiveModal')" title="Archivio">📁</button>
+            <button class="btn btn-gray" style="width:auto; padding:8px 10px;" onclick="toggleModal('settingsModal')" title="Impostazioni">⚙️</button>
         </div>
     </header>
 
@@ -158,7 +154,6 @@
     </div>
 </div>
 
-<!-- MODALI -->
 <div id="regModal" class="modal"><div class="modal-content">
     <h3 style="margin-top:0">Movimenti</h3>
     <div class="table-container">
@@ -180,14 +175,16 @@
     <h3>Impostazioni</h3>
     <div style="display:flex; gap:8px; margin-bottom:15px;"><input type="text" id="c-nome" placeholder="Nome" style="margin:0"><input type="number" id="c-mill" placeholder="Mill." style="margin:0; width:80px;"><button class="btn btn-blue" style="width:auto" onclick="salvaCondomino()">+</button></div>
     <div id="lista-condo"></div>
-    <hr style="margin:20px 0;"><button class="btn btn-red" style="background:#000; width:100%" onclick="resetTotale()">⚠️ RESET TOTALE DATABASE</button>
+    <hr style="margin:20px 0;">
+    <button class="btn btn-red" style="background:#000; width:100%; margin-bottom:10px;" onclick="resetTotale()">⚠️ RESET TOTALE DATABASE</button>
+    <button class="btn btn-red" style="width:100%; background:#475569;" onclick="disconnetti()">🚪 DISCONNETTI ACCOUNT</button>
     <button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('settingsModal')">Chiudi</button>
 </div></div>
 
 <div id="archiveModal" class="modal"><div class="modal-content"><div id="lista-archivi"></div><button class="btn btn-gray" style="margin-top:15px; width:100%" onclick="toggleModal('archiveModal')">Chiudi</button></div></div>
 
 <script>
-    // Configurazione Firebase - Sostituisci i valori con i tuoi reali se necessario.
+    // Configurazione Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBCHjSOjZmN6Fcj-Pju4AM5Yx2edIuDwJo",
       authDomain: "condomanager-86dac.firebaseapp.com",
@@ -201,9 +198,7 @@
     const fs = firebase.firestore();
     const auth = firebase.auth();
     
-    // Stato dell'applicazione con supporto a ID stabili per i condomini
     let state = { anno: 2024, condomini: [], spese: [], versamenti: [] };
-    // Mappa globale temporanea per contenere i dati caricati dall'archivio ed evitare rotture di stringhe con apici nell'HTML
     let archivioDataCache = {};
 
     async function accedi() {
@@ -240,7 +235,6 @@
         fs.collection("gestione").doc("corrente").onSnapshot(doc => { 
             if (doc.exists) { 
                 let data = doc.data();
-                // Patch di retrocompatibilità: se i vecchi condomini non hanno un ID unico stabile, lo generiamo adesso
                 if(data.condomini) {
                     data.condomini = data.condomini.map((c, idx) => {
                         if(!c.id) c.id = "c_" + Date.now() + "_" + idx;
@@ -266,13 +260,11 @@
         document.getElementById('st-fondo').innerText = totF.toFixed(2) + "€";
         document.getElementById('st-liquidita').innerText = (totV - totS).toFixed(2) + "€";
 
-        // Popola select condomini usando il loro ID univoco stabile
         document.getElementById('f-condo').innerHTML = state.condomini.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
         
         const tbody = document.getElementById('main-table-body');
         tbody.innerHTML = state.condomini.map(c => {
             const q = (totS * c.mill) / 1000;
-            // Filtro basato su c.id anziché sull'indice dell'array
             const v = state.versamenti.filter(x => x.id === c.id && x.cau === "Rata Condominiale").reduce((a,b) => a + Number(b.imp), 0);
             return `<tr><td><b>${c.nome}</b></td><td>${q.toFixed(2)}</td><td>${v.toFixed(2)}</td><td style="color:${v-q>=0?'var(--s)':'var(--d)'}; font-weight:700">${(v-q).toFixed(2)}</td></tr>`;
         }).join('');
@@ -283,14 +275,12 @@
             regHtml += `<tr><td><small>${s.data}</small></td><td>${s.desc}</td><td style="color:red">-${Number(s.imp).toFixed(2)}</td><td><span onclick="delItem('SPESA', ${idx})" style="color:red; cursor:pointer; font-weight:bold;">✕</span></td></tr>`; 
         });
         state.versamenti.forEach((v, idx) => { 
-            // Cerca il condomino tramite ID stabile
             const condominoObj = state.condomini.find(c => c.id === v.id);
             const nomeCondo = condominoObj ? condominoObj.nome : "Sconosciuto";
             regHtml += `<tr><td><small>${v.data}</small></td><td>${nomeCondo} (${v.cau.charAt(0)})</td><td style="color:green">+${Number(v.imp).toFixed(2)}</td><td><span onclick="ricevuta(${idx})" style="color:blue; cursor:pointer; margin-right:12px; font-weight:bold;">PDF</span><span onclick="delItem('VERS', ${idx})" style="color:red; cursor:pointer; font-weight:bold;">✕</span></td></tr>`; 
         });
         regBody.innerHTML = regHtml;
         
-        // Gestione condomini nelle impostazioni con ID stabile
         document.getElementById('lista-condo').innerHTML = state.condomini.map(c => `<div style="padding:10px; border-bottom:1px solid #eee;">${c.nome} (${c.mill} ml.) <span onclick="delCondominoByID('${c.id}')" style="float:right; color:red; cursor:pointer; font-weight:bold;">✕</span></div>`).join('');
     }
 
@@ -318,7 +308,7 @@
     }
 
     async function delCondominoByID(id) {
-        if(confirm("Eliminare questo condomino? Attenzione: i suoi versamenti passati rimarranno tracciati ma slegati dal nome." )) {
+        if(confirm("Eliminare questo condomino? I suoi versamenti rimarranno tracciati.")) {
             state.condomini = state.condomini.filter(c => c.id !== id);
             await fs.collection("gestione").doc("corrente").set(state);
         }
@@ -350,14 +340,10 @@
         doc.save("Quote.pdf");
     }
 
-    // RISOLTO IL BUG DELRESET ANNULLATO SUL BACK: Prima salviamo su Firebase in modo definitivo, poi mostriamo il PDF!
     async function proceduraChiusura() { 
         if(confirm("Confermi la chiusura e l'archiviazione dell'anno " + state.anno + "? L'operazione resetterà le spese.")) { 
             try {
-                // 1. Creiamo una copia profonda dello stato attuale da archiviare
                 const copiaArchivio = JSON.parse(JSON.stringify(state));
-                
-                // 2. Prepariamo lo stato del nuovo anno mantenendo SOLO i condomini e i versamenti legati al Fondo Cassa
                 const fondoCassaNuovoAnno = state.versamenti.filter(v => v.cau === "Fondo Cassa");
                 const nuovoAnno = parseInt(state.anno) + 1;
                 
@@ -368,16 +354,11 @@
                     versamenti: fondoCassaNuovoAnno
                 };
 
-                // 3. Eseguiamo il salvataggio definitivo su Cloud Firestore PRIMA di generare il file
                 await fs.collection("archivio").doc("anno_" + state.anno).set(copiaArchivio);
                 await fs.collection("gestione").doc("corrente").set(nuovoStato);
                 
                 alert("Anno archiviato con successo su Database! Ora verrà scaricato il PDF di riepilogo.");
-                
-                // 4. Chiudiamo il modale
                 toggleModal('modalEsercizio');
-                
-                // 5. Solo alla fine generiamo il PDF (se la pagina ricarica o perde il focus il salvataggio è già al sicuro)
                 generaBilancioCompleto(copiaArchivio);
                 
             } catch (error) {
@@ -413,10 +394,7 @@
         const nomeC = c ? c.nome : "Sconosciuto";
         const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: [105, 148] }); 
         doc.text("RICEVUTA PAGAMENTO", 10, 20); doc.setFontSize(10); 
-        doc.text(`Data: ${v.data}
-Condomino: ${nomeC}
-Causale: ${v.cau}
-Importo: ${Number(v.imp).toFixed(2)} €`, 10, 40); 
+        doc.text(`Data: ${v.data}\nCondomino: ${nomeC}\nCausale: ${v.cau}\nImporto: ${Number(v.imp).toFixed(2)} €`, 10, 40); 
         doc.save(`Ricevuta_${v.data.replace(/\//g,'-')}.pdf`); 
     }
 
@@ -452,17 +430,16 @@ Importo: ${Number(v.imp).toFixed(2)} €`, 10, 40);
 
     function loadArchivio() { 
         fs.collection("archivio").onSnapshot(snap => { 
-            archivioDataCache = {}; // Svuota cache locale
+            archivioDataCache = {}; 
             document.getElementById('lista-archivi').innerHTML = snap.docs.map(doc => {
                 const data = doc.data();
                 const annoKey = "anno_" + data.anno;
-                archivioDataCache[annoKey] = data; // Salva nello stato JS per evitare JSON.stringify rotto nell'HTML
+                archivioDataCache[annoKey] = data; 
                 return `<div style="padding:10px; border-bottom:1px solid #eee;">Anno ${data.anno} <button class="btn btn-gray" style="float:right; padding:4px 8px;" onclick="scaricaBilancioDaCache('${annoKey}')">PDF</button></div>`;
             }).join(''); 
         }); 
     }
     
-    // Inizializza il campo data manuale con la data odierna
     document.getElementById('f-data').value = new Date().toLocaleDateString('it-IT');
 </script>
 </body>
